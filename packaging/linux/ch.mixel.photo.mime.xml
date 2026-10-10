@@ -3,8 +3,8 @@
      Installed to /usr/share/mime/packages/ (update-mime-database runs on install). -->
 <mime-info xmlns="http://www.freedesktop.org/standards/shared-mime-info">
   <mime-type type="application/x-photocraft">
-    <comment>PhotoCraft document</comment>
-    <icon name="ai.storyteller.photocraft"/>
+    <comment>MIXEL Photo document</comment>
+    <icon name="ch.mixel.photo"/>
     <glob pattern="*.pcraft"/>
   </mime-type>
   <mime-type type="image/x-psb">

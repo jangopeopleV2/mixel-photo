@@ -1,11 +1,11 @@
 [Desktop Entry]
 Type=Application
-Name=PhotoCraft
+Name=MIXEL Photo
 GenericName=Image Editor
 Comment=Edit photos and layered PSD documents
 Exec=photocraft %F
 TryExec=photocraft
-Icon=ai.storyteller.photocraft
+Icon=ch.mixel.photo
 Terminal=false
 # The native runner does not complete desktop startup-notification handshakes.
 StartupNotify=false

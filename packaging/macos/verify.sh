@@ -37,8 +37,8 @@ case "$ARCH" in
   *) echo "unknown --arch $ARCH" >&2; exit 2 ;;
 esac
 
-DMG="$DIST/photocraft-$VERSION-macos-$ARCH.dmg"
-CLI_ZIP="$DIST/photocraft-cli-$VERSION-macos-$ARCH.zip"
+DMG="$DIST/mixel-photo-$VERSION-macos-$ARCH.dmg"
+CLI_ZIP="$DIST/mixel-photo-cli-$VERSION-macos-$ARCH.zip"
 IDENTITY="${MACOS_SIGN_IDENTITY:--}"
 STRICT=0
 if [ "$IDENTITY" != "-" ] && [ -n "${APPLE_ID:-}" ] && [ -n "${APPLE_PASSWORD:-}" ] && [ -n "${APPLE_TEAM_ID:-}" ]; then
@@ -83,9 +83,9 @@ trap 'rm -rf "$WORK"' EXIT
 # ---- CLI zip -----------------------------------------------------------------------------------
 echo "==> $(basename "$CLI_ZIP")"
 ditto -x -k "$CLI_ZIP" "$WORK/cli"
-CLI="$WORK/cli/photocraft-cli-$VERSION-macos-$ARCH/photocraft-cli"
+CLI="$WORK/cli/mixel-photo-cli-$VERSION-macos-$ARCH/photocraft-cli"
 if [ ! -x "$CLI" ]; then
-  echo "error: $(basename "$CLI_ZIP") has no executable photocraft-cli-$VERSION-macos-$ARCH/photocraft-cli" >&2
+  echo "error: $(basename "$CLI_ZIP") has no executable mixel-photo-cli-$VERSION-macos-$ARCH/photocraft-cli" >&2
   exit 1
 fi
 
