@@ -20,7 +20,7 @@ fn main() -> std::io::Result<()> {
         .set("ProductName", "MIXEL Photo")
         .set("FileDescription", "MIXEL Photo command-line interface")
         .set("CompanyName", "MIXEL")
-        .set("LegalCopyright", "Copyright (c) the MIXEL Photo authors. MIT OR Apache-2.0.")
+        .set("LegalCopyright", "Copyright (c) the PhotoCraft authors. MIT OR Apache-2.0. MIXEL Photo modifications by MIXEL contributors.")
         .set("OriginalFilename", "photocraft-cli.exe")
         .set("InternalName", "photocraft-cli");
     if let Err(err) = res.compile() {

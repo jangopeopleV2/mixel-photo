@@ -14,7 +14,7 @@ section: graphics
 priority: optional
 maintainer: ${PHOTOCRAFT_MAINTAINER}
 vendor: MIXEL
-homepage: https://getartcraft.com/apps/photocraft
+homepage: https://github.com/jangopeopleV2/mixel-photo
 license: MIT OR Apache-2.0
 description: |-
   Open-source, native image editor with familiar, professional tools.

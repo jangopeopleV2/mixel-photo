@@ -16,7 +16,7 @@ fn main() {
         .set("ProductName", "MIXEL Photo")
         .set("FileDescription", "MIXEL Photo image editor")
         .set("CompanyName", "MIXEL")
-        .set("LegalCopyright", "Copyright (c) the MIXEL Photo authors. MIT OR Apache-2.0.")
+        .set("LegalCopyright", "Copyright (c) the PhotoCraft authors. MIT OR Apache-2.0. MIXEL Photo modifications by MIXEL contributors.")
         .set("OriginalFilename", "photocraft.exe")
         .set("InternalName", "photocraft");
     if let Err(e) = res.compile() {
