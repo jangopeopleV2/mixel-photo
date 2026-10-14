@@ -89,7 +89,19 @@ pub(crate) fn read_file(path: &str) -> Result<Vec<u8>> {
 /// Every file the engine writes goes through here: crash-safe (temp file + fsync + rename, see
 /// [`photocraft_format::atomic`]), so a failed save never destroys the previous file.
 pub(crate) fn write_file(path: &str, bytes: &[u8]) -> Result<()> {
-    photocraft_format::atomic_write(std::path::Path::new(path), bytes).map_err(|e| EngineError::Other(e.to_string()))
+    #[cfg(all(target_os = "macos", feature = "mac-app-store"))]
+    {
+        let path = crate::macos_mas::resolve(path).map_err(EngineError::Other)?;
+        let actual = photocraft_format::atomic::atomic_write_path(&path, bytes).map_err(|e| EngineError::Other(e.to_string()))?;
+        // after_write queues an actionable warning; the complete bytes are already committed.
+        let _ = crate::macos_mas::after_write(actual);
+        Ok(())
+    }
+    #[cfg(not(all(target_os = "macos", feature = "mac-app-store")))]
+    {
+        photocraft_format::atomic_write(std::path::Path::new(path), bytes).map_err(|e| EngineError::Other(e.to_string()))?;
+        crate::macos_mas::after_write(path).map_err(EngineError::Other)
+    }
 }
 #[cfg(target_arch = "wasm32")]
 pub(crate) fn write_file(path: &str, _bytes: &[u8]) -> Result<()> {

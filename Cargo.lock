@@ -254,6 +254,16 @@ source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "330a5ed07fa54e4702c9d6c4174f74427fc0ef6e214bbd677ae50a5099946470"
 
 [[package]]
+name = "apple-scoped-bookmarks"
+version = "0.1.0"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "2c2292ed2eca1af90a2c39dc660b8e061c12effb3d3f092f6f9edde225c8033c"
+dependencies = [
+ "objc2 0.6.4",
+ "objc2-foundation 0.3.2",
+]
+
+[[package]]
 name = "arbitrary"
 version = "1.4.2"
 source = "registry+https://github.com/rust-lang/crates.io-index"
@@ -4218,6 +4228,7 @@ dependencies = [
  "photocraft-raster",
  "photocraft-tablet",
  "photocraft-ui-egui",
+ "raw-window-handle",
  "resvg",
  "rfd",
  "ron",
@@ -4356,10 +4367,12 @@ dependencies = [
 name = "photocraft-engine"
 version = "0.8.2"
 dependencies = [
+ "apple-scoped-bookmarks",
  "blake3",
  "craft-print",
  "exr",
  "flate2",
+ "objc2-foundation 0.3.2",
  "photocraft-affinity",
  "photocraft-algo",
  "photocraft-cms",
@@ -4394,6 +4407,7 @@ dependencies = [
  "blake3",
  "crc32fast",
  "flate2",
+ "objc2-foundation 0.3.2",
  "photocraft-codecs",
  "photocraft-color",
  "photocraft-doc",

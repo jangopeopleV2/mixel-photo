@@ -8,6 +8,7 @@ description = "Photocraft: an open-source, native image editor"
 build = "build.rs"
 
 [features]
+mac-app-store = ["photocraft-engine/mac-app-store", "photocraft-ui-egui/mac-app-store", "dep:raw-window-handle"]
 # Open HEIC/HEIF photos (the optional photocraft-heif crate). Not default so distributors choose
 # it; official builds (CI, packaging/, release) build with `--features heif`.
 heif = ["photocraft-codecs/heif"]
@@ -42,6 +43,8 @@ open = "5"
 ron = "0.12"
 
 [target.'cfg(target_os = "macos")'.dependencies]
+# MAS panels require a valid parent window before creating AppKit sheets; already in Cargo.lock.
+raw-window-handle = { version = "=0.6.2", optional = true }
 # Safe CoreGraphics bindings, compatible with the existing macOS 11 deployment target.
 # `event` (CGEventSource) is used for the Caps Lock poll (#1758).
 core-graphics2 = { version = "=0.6.1", default-features = false, features = ["display", "window", "link", "event"] }

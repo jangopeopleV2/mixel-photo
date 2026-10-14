@@ -112,12 +112,98 @@ fn dialog_file_name(suggested: &str, windows: bool) -> Option<String> {
 /// Shows an Open or Save dialog without blocking the event loop (#673, #574): rfd's async dialog
 /// is created here, on the main thread, with the window as its parent (a sheet on macOS, an owned
 /// modal window elsewhere), and a helper thread waits for it and hands the answer to the app.
+#[cfg(not(all(target_os = "macos", feature = "mac-app-store")))]
 fn show_file_dialog(request: FileDialogRequest, parent: Option<&eframe::Frame>, reply: FileDialogReply) {
+    let answer = file_dialog_answer(request, parent);
+    // Without the thread the reply is dropped unanswered, which the app takes as Cancel.
+    if let Err(e) = std::thread::Builder::new().name("file dialog".into()).spawn(move || {
+        // An empty answer from a system with no dialog backend isn't a Cancel (#3354).
+        let answer = block_on(answer).or_else(|| crate::file_dialog_probe::known_problem().map(FileDialogAnswer::Unavailable));
+        reply.send(answer)
+    }) {
+        log::error!("couldn't wait for the file dialog: {e}");
+    }
+}
+
+type DialogAnswer = Pin<Box<dyn Future<Output = Option<FileDialogAnswer>> + Send>>;
+
+#[cfg(any(test, all(target_os = "macos", feature = "mac-app-store")))]
+#[derive(Clone, Copy)]
+struct FileSheetContext {
+    parent: bool,
+    main_thread: bool,
+    running: bool,
+}
+
+/// Keep the reply on the caller until the worker is ready, and construct no native panel before
+/// every prerequisite succeeds. The generic job/reply seam also tests startup failures without
+/// AppKit, a window, a thread or access to the user's files.
+#[cfg(any(test, all(target_os = "macos", feature = "mac-app-store")))]
+fn begin_file_sheet<Job, Reply>(
+    context: FileSheetContext,
+    reply: Reply,
+    start_waiter: impl FnOnce(std::sync::mpsc::Receiver<(Job, Reply)>) -> std::io::Result<()>,
+    build: impl FnOnce() -> Job,
+) -> Result<(), (Reply, String)> {
+    let unavailable = if !context.parent {
+        Some("No app window is available for file selection. Try again from the MIXEL Photo window.")
+    } else if !context.main_thread {
+        Some("File selection could not start on the main UI thread. Reopen MIXEL Photo and try again.")
+    } else if !context.running {
+        Some("The app window is not ready for file selection. Try again from the MIXEL Photo window.")
+    } else {
+        None
+    };
+    if let Some(message) = unavailable {
+        return Err((reply, message.into()));
+    }
+    let (tx, rx) = std::sync::mpsc::channel();
+    if let Err(error) = start_waiter(rx) {
+        return Err((reply, format!("Could not start the file chooser: {error}. Reopen MIXEL Photo and try again.")));
+    }
+    tx.send((build(), reply)).map_err(|error| {
+        let (_, reply) = error.0;
+        (reply, "The file chooser worker stopped before receiving the dialog. Reopen MIXEL Photo and try again.".into())
+    })
+}
+
+#[cfg(all(target_os = "macos", feature = "mac-app-store"))]
+fn show_file_dialog(request: FileDialogRequest, parent: Option<&eframe::Frame>, reply: FileDialogReply) {
+    use raw_window_handle::HasWindowHandle as _;
+    let has_parent = parent.is_some_and(|parent| parent.window_handle().is_ok());
+    // Without a parent there is no reason to create or consult NSApplication at all.
+    let main_thread = if has_parent { objc2::MainThreadMarker::new() } else { None };
+    let running = main_thread.is_some_and(|main_thread| objc2_app_kit::NSApplication::sharedApplication(main_thread).isRunning());
+    let context = FileSheetContext { parent: has_parent, main_thread: main_thread.is_some(), running };
+    if let Err((reply, message)) = begin_file_sheet(
+        context,
+        reply,
+        |rx: std::sync::mpsc::Receiver<(DialogAnswer, FileDialogReply)>| {
+            std::thread::Builder::new()
+                .name("file dialog sheet".into())
+                .spawn(move || {
+                    if let Ok((answer, reply)) = rx.recv() {
+                        let answer = block_on(answer).or_else(|| crate::file_dialog_probe::known_problem().map(FileDialogAnswer::Unavailable));
+                        reply.send(answer);
+                    }
+                })
+                .map(|_| ())
+        },
+        // rfd constructs and starts AppKit's sheet here, on the main thread, after the waiter
+        // exists. In particular a thread-spawn failure cannot leave a native panel stranded.
+        || file_dialog_answer(request, parent),
+    ) {
+        log::error!("Cannot start native file selection: {message}");
+        reply.send(Some(FileDialogAnswer::Unavailable(message)));
+    }
+}
+
+fn file_dialog_answer(request: FileDialogRequest, parent: Option<&eframe::Frame>) -> DialogAnswer {
     let mut dialog = rfd::AsyncFileDialog::new();
     if let Some(parent) = parent {
         dialog = dialog.set_parent(parent);
     }
-    let answer: Pin<Box<dyn Future<Output = Option<FileDialogAnswer>> + Send>> = match request {
+    match request {
         FileDialogRequest::Open { multiple, initial_dir, extensions } => {
             if let Some(dir) = initial_dir {
                 dialog = dialog.set_directory(dir);
@@ -133,10 +219,10 @@ fn show_file_dialog(request: FileDialogRequest, parent: Option<&eframe::Frame>, 
             };
             if multiple {
                 let picked = dialog.pick_files();
-                Box::pin(async move { picked.await.map(|files| FileDialogAnswer::Paths(files.iter().map(path_of).collect())) })
+                Box::pin(async move { picked.await.map(|files| FileDialogAnswer::Paths(files.iter().filter_map(|file| path_of(file, false)).collect())) })
             } else {
                 let picked = dialog.pick_file();
-                Box::pin(async move { picked.await.map(|file| FileDialogAnswer::Paths(vec![path_of(&file)])) })
+                Box::pin(async move { picked.await.and_then(|file| path_of(&file, false).map(|path| FileDialogAnswer::Paths(vec![path]))) })
             }
         }
         FileDialogRequest::Folder { initial_dir } => {
@@ -144,7 +230,7 @@ fn show_file_dialog(request: FileDialogRequest, parent: Option<&eframe::Frame>, 
                 dialog = dialog.set_directory(dir);
             }
             let picked = dialog.pick_folder();
-            Box::pin(async move { picked.await.map(|folder| FileDialogAnswer::FolderTo(path_of(&folder))) })
+            Box::pin(async move { picked.await.and_then(|folder| path_of(&folder, false).map(FileDialogAnswer::FolderTo)) })
         }
         FileDialogRequest::Save { suggested } => {
             for (name, exts) in save_filters(&suggested) {
@@ -157,21 +243,13 @@ fn show_file_dialog(request: FileDialogRequest, parent: Option<&eframe::Frame>, 
                 dialog = dialog.set_directory(dir);
             }
             let picked = dialog.save_file();
-            Box::pin(async move { picked.await.map(|file| FileDialogAnswer::SaveTo(path_of(&file))) })
+            Box::pin(async move { picked.await.and_then(|file| path_of(&file, true).map(FileDialogAnswer::SaveTo)) })
         }
-    };
-    // Without the thread the reply is dropped unanswered, which the app takes as Cancel.
-    if let Err(e) = std::thread::Builder::new().name("file dialog".into()).spawn(move || {
-        // An empty answer from a system with no dialog backend isn't a Cancel (#3354).
-        let answer = block_on(answer).or_else(|| crate::file_dialog_probe::known_problem().map(FileDialogAnswer::Unavailable));
-        reply.send(answer)
-    }) {
-        log::error!("couldn't wait for the file dialog: {e}");
     }
 }
 
-fn path_of(file: &rfd::FileHandle) -> String {
-    file.path().to_string_lossy().into_owned()
+fn path_of(file: &rfd::FileHandle, save: bool) -> Option<String> {
+    photocraft_engine::macos_mas::picked(file.path(), save).map(|p| p.to_string_lossy().into_owned())
 }
 
 /// Runs `future` to completion on this thread, sleeping until it is woken.
@@ -219,12 +297,36 @@ fn recovery_dir() -> Option<PathBuf> {
 /// [`photocraft_format::atomic`]). Every document write (Save, Save As, Export, Save for Web) and
 /// the preferences go through here, so a failed or interrupted save never destroys the old file.
 fn write_atomic(path: &Path, bytes: &[u8]) -> Result<(), String> {
-    photocraft_format::atomic_write(path, bytes).map_err(|e| e.to_string())
+    #[cfg(all(target_os = "macos", feature = "mac-app-store"))]
+    {
+        let path = photocraft_engine::macos_mas::resolve(path)?;
+        let actual = photocraft_format::atomic::atomic_write_path(&path, bytes).map_err(|e| e.to_string())?;
+        // after_write queues a warning; successful publication stays successful.
+        let _ = photocraft_engine::macos_mas::after_write(actual);
+        Ok(())
+    }
+    #[cfg(not(all(target_os = "macos", feature = "mac-app-store")))]
+    {
+        photocraft_format::atomic_write(path, bytes).map_err(|e| e.to_string())?;
+        photocraft_engine::macos_mas::after_write(path)
+    }
 }
 
 /// [`write_atomic`] reporting the fraction written (a background save's progress, #3389).
 fn write_atomic_progress(path: &Path, bytes: &[u8], progress: &dyn Fn(f32)) -> Result<(), String> {
-    photocraft_format::atomic_write_progress(path, bytes, progress).map_err(|e| e.to_string())
+    #[cfg(all(target_os = "macos", feature = "mac-app-store"))]
+    {
+        let path = photocraft_engine::macos_mas::resolve(path)?;
+        let actual = photocraft_format::atomic::atomic_write_progress_path(&path, bytes, progress).map_err(|e| e.to_string())?;
+        // after_write queues a warning; successful publication stays successful.
+        let _ = photocraft_engine::macos_mas::after_write(actual);
+        Ok(())
+    }
+    #[cfg(not(all(target_os = "macos", feature = "mac-app-store")))]
+    {
+        photocraft_format::atomic_write_progress(path, bytes, progress).map_err(|e| e.to_string())?;
+        photocraft_engine::macos_mas::after_write(path)
+    }
 }
 
 fn export_options(settings: &photocraft_ui_egui::ExportSettings) -> photocraft_io::ExportOptions {
@@ -554,6 +656,97 @@ mod tests {
     use photocraft_format::list_recovery;
     use photocraft_ui_egui::{PhotocraftApp, prefs_ui};
     use serde_json::{Value, json};
+
+    #[test]
+    fn file_sheet_context_failures_preserve_reply_without_worker_or_native_panel() {
+        for context in [
+            FileSheetContext { parent: false, main_thread: true, running: true },
+            FileSheetContext { parent: true, main_thread: false, running: true },
+            FileSheetContext { parent: true, main_thread: true, running: false },
+        ] {
+            let worker = std::cell::Cell::new(false);
+            let panel = std::cell::Cell::new(false);
+            let result = begin_file_sheet(
+                context,
+                "reply",
+                |_| {
+                    worker.set(true);
+                    Ok(())
+                },
+                || {
+                    panel.set(true);
+                },
+            );
+            let (reply, message) = result.unwrap_err();
+            assert_eq!(reply, "reply");
+            assert!(message.contains("MIXEL Photo"), "{message}");
+            assert!(!worker.get() && !panel.get());
+        }
+    }
+
+    #[test]
+    fn file_sheet_worker_start_failure_cannot_construct_a_native_panel() {
+        let panel = std::cell::Cell::new(false);
+        let result = begin_file_sheet(
+            FileSheetContext { parent: true, main_thread: true, running: true },
+            "reply",
+            |_| Err(std::io::Error::other("simulated thread-spawn failure")),
+            || panel.set(true),
+        );
+        let (reply, message) = result.unwrap_err();
+        assert_eq!(reply, "reply");
+        assert!(message.contains("simulated thread-spawn failure"));
+        assert!(!panel.get());
+    }
+
+    #[test]
+    fn file_sheet_constructs_the_panel_only_after_the_waiter_accepts_jobs() {
+        let started = std::cell::Cell::new(false);
+        let received = RefCell::new(None);
+        begin_file_sheet(
+            FileSheetContext { parent: true, main_thread: true, running: true },
+            "reply",
+            |rx| {
+                started.set(true);
+                *received.borrow_mut() = Some(rx);
+                Ok(())
+            },
+            || {
+                assert!(started.get());
+                42
+            },
+        )
+        .unwrap();
+        assert_eq!(received.borrow_mut().take().unwrap().try_recv().unwrap(), (42, "reply"));
+    }
+
+    #[test]
+    fn file_sheet_lost_worker_returns_the_reply_for_an_actionable_error() {
+        let result = begin_file_sheet(
+            FileSheetContext { parent: true, main_thread: true, running: true },
+            "reply",
+            |rx| {
+                drop(rx);
+                Ok(())
+            },
+            || 42,
+        );
+        let (reply, message) = result.unwrap_err();
+        assert_eq!(reply, "reply");
+        assert!(message.contains("worker stopped"));
+    }
+
+    #[cfg(all(target_os = "macos", feature = "mac-app-store"))]
+    #[test]
+    fn file_sheet_missing_parent_reports_unavailable_to_the_ui_without_appkit() {
+        let services = Services { file_dialog: Some(Box::new(show_file_dialog)), ..Default::default() };
+        let mut app = PhotocraftApp::new(Session::new(), services);
+        app.open_dialog_file().unwrap();
+        app.poll_file_dialog(&egui::Context::default(), None);
+        assert!(!app.file_dialog_open());
+        assert!(app.ui.status.contains("No app window is available for file selection"), "{}", app.ui.status);
+        assert!(app.ui.status_error);
+    }
 
     #[cfg(all(unix, not(target_os = "macos")))]
     #[test]

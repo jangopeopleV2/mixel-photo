@@ -100,6 +100,8 @@ impl PhotocraftApp {
     /// Read and open the file at `path` (see [`open_file`](Self::open_file)).
     #[cfg(not(target_arch = "wasm32"))]
     pub fn open_path(&mut self, path: &str) -> Result<Vec<String>, String> {
+        let resolved = crate::macos_mas::resolve(path)?;
+        let path = resolved.to_str().ok_or("File path is not valid Unicode")?;
         // Documents opening in the background are read on the worker too (a 2 GB PSB read
         // would block the window). Preset files (brushes, gradients) go the usual way.
         let ext = std::path::Path::new(path).extension().map(|e| e.to_string_lossy().to_ascii_lowercase()).unwrap_or_default();
@@ -169,6 +171,12 @@ impl PhotocraftApp {
             DropTarget::Canvas | DropTarget::Elsewhere => None,
         };
         for f in files {
+            if f.path().is_absolute()
+                && let Err(error) = crate::macos_mas::selected(f.path(), false)
+            {
+                self.open_failed(&dropped_name(&f), &error);
+                continue;
+            }
             let name = dropped_name(&f);
             if target == DropTarget::Canvas && !crate::preset_files_ui::is_preset_file(&name) {
                 self.drop_places.push_back(f);
@@ -250,6 +258,8 @@ impl PhotocraftApp {
         for e in events {
             match e {
                 OsEvent::Open(paths) => {
+                    let paths: Vec<String> =
+                        paths.into_iter().filter_map(|path| crate::macos_mas::picked(path, false)).map(|p| p.to_string_lossy().into_owned()).collect();
                     self.open_paths(&paths);
                     // Bring the window forward when another app (Finder, the Dock) asked us to open.
                     ctx.send_viewport_cmd(egui::ViewportCommand::Focus);

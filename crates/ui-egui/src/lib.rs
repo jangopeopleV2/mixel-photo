@@ -14,6 +14,7 @@ macro_rules! tl {
     };
 }
 
+pub use photocraft_engine::macos_mas;
 pub mod actions;
 pub mod adjust_dialog;
 pub mod adjust_editors;
@@ -1611,6 +1612,9 @@ impl PhotocraftApp {
 
 impl eframe::App for PhotocraftApp {
     fn logic(&mut self, ctx: &egui::Context, frame: &mut eframe::Frame) {
+        for warning in crate::macos_mas::poll() {
+            self.ui.status = warning;
+        }
         i18n::set_current(i18n::Lang::from_pref(&self.session.prefs().interface.language));
         // Caps Lock state read from the OS once per frame (see `Services::caps_lock`): the canvas
         // cursor block needs it before the frame renders. `None` (Wayland/web) keeps `false`.

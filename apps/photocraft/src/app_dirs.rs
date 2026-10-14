@@ -62,6 +62,9 @@ pub fn config_dir() -> Option<PathBuf> {
 
 /// Resolve the data directory from the environment (`env`) and the executable's folder.
 pub fn resolve(env: impl Fn(&str) -> Option<OsString>, exe_dir: Option<&Path>) -> DataDir {
+    if photocraft_engine::macos_mas::enabled() {
+        return DataDir { dir: photocraft_engine::macos_mas::container_dir("MIXEL Photo"), mode: Mode::Platform, warning: None };
+    }
     if let Some(d) = env("PHOTOCRAFT_CONFIG_DIR").filter(|d| !d.is_empty()) {
         return DataDir { dir: Some(PathBuf::from(d)), mode: Mode::Override, warning: None };
     }

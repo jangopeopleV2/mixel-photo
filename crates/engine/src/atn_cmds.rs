@@ -2925,7 +2925,18 @@ fn save(s: &mut Session, p: &Value) -> Result<Value> {
 
 #[cfg(not(target_arch = "wasm32"))]
 fn write_file(path: &str, bytes: &[u8]) -> std::io::Result<()> {
-    std::fs::write(path, bytes)
+    #[cfg(all(target_os = "macos", feature = "mac-app-store"))]
+    {
+        let path = crate::macos_mas::resolve(path).map_err(std::io::Error::other)?;
+        let actual = photocraft_format::macos_atomic::write(&path, bytes)?;
+        // A refresh failure is already queued for the UI; the committed file remains saved.
+        let _ = crate::macos_mas::after_write(&actual);
+        Ok(())
+    }
+    #[cfg(not(all(target_os = "macos", feature = "mac-app-store")))]
+    {
+        std::fs::write(path, bytes)
+    }
 }
 
 #[cfg(target_arch = "wasm32")]

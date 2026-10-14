@@ -7,6 +7,9 @@ license.workspace = true
 [lints]
 workspace = true
 
+[features]
+mac-app-store = ["photocraft-engine/mac-app-store"]
+
 [dependencies]
 craft-ui = { workspace = true }
 photocraft-geom = { workspace = true }

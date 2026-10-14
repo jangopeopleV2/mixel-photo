@@ -22,6 +22,8 @@
 //! error.
 //!
 //! [`atomic_write_with`] takes an [`AtomicFs`] so tests can inject failures at each step.
+//! App Store production writes use Foundation's private same-volume staging instead of
+//! requiring a sibling-file grant. The explicit failure-injection seam remains unchanged.
 
 use std::io::{self, Write};
 use std::path::{Path, PathBuf};
@@ -146,13 +148,48 @@ impl RenameRetry {
 /// Errors keep their [`io::ErrorKind`] and say what happened and that the original file is
 /// unchanged.
 pub fn atomic_write(path: &Path, bytes: &[u8]) -> io::Result<()> {
-    atomic_write_with(&RealFs, RenameRetry::platform(), path, bytes)
+    #[cfg(all(target_os = "macos", feature = "mac-app-store"))]
+    {
+        atomic_write_path(path, bytes).map(|_| ())
+    }
+    #[cfg(not(all(target_os = "macos", feature = "mac-app-store")))]
+    {
+        atomic_write_with(&RealFs, RenameRetry::platform(), path, bytes)
+    }
 }
 
 /// [`atomic_write`] reporting the fraction of `bytes` written to `progress` as it goes (a save's
 /// progress bar, #3389); the flush and rename follow the last report.
 pub fn atomic_write_progress(path: &Path, bytes: &[u8], progress: &dyn Fn(f32)) -> io::Result<()> {
-    atomic_write_with_progress(&RealFs, RenameRetry::platform(), path, bytes, progress)
+    #[cfg(all(target_os = "macos", feature = "mac-app-store"))]
+    {
+        atomic_write_progress_path(path, bytes, progress).map(|_| ())
+    }
+    #[cfg(not(all(target_os = "macos", feature = "mac-app-store")))]
+    {
+        atomic_write_with_progress(&RealFs, RenameRetry::platform(), path, bytes, progress)
+    }
+}
+
+/// App Store atomic publication, returning Foundation's actual committed path.
+#[cfg(all(target_os = "macos", feature = "mac-app-store"))]
+pub fn atomic_write_path(path: &Path, bytes: &[u8]) -> io::Result<PathBuf> {
+    crate::macos_atomic::write(&resolve_symlink(path), bytes)
+}
+
+/// [`atomic_write_progress`] with the committed path for host bookmark refresh.
+#[cfg(all(target_os = "macos", feature = "mac-app-store"))]
+pub fn atomic_write_progress_path(path: &Path, bytes: &[u8], progress: &dyn Fn(f32)) -> io::Result<PathBuf> {
+    crate::macos_atomic::write_with(&resolve_symlink(path), |file| {
+        let mut written = 0usize;
+        for chunk in bytes.chunks(WRITE_CHUNK) {
+            file.write_all(chunk)?;
+            written = written.saturating_add(chunk.len());
+            progress(written as f32 / bytes.len().max(1) as f32);
+        }
+        Ok(())
+    })
+    .map(|(_, actual)| actual)
 }
 
 /// [`atomic_write`] through an explicit file system and retry policy (the failure-injection seam).

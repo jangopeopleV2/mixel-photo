@@ -26,6 +26,8 @@ pub mod atomic;
 pub mod autosave;
 mod convert;
 mod finite;
+#[cfg(all(target_os = "macos", feature = "mac-app-store"))]
+pub mod macos_atomic;
 pub mod manifest;
 mod migrate;
 pub mod read;

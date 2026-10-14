@@ -27,6 +27,7 @@ mod appearance;
 mod apple_events;
 mod caps_lock;
 mod caption_style;
+#[cfg(not(all(target_os = "macos", feature = "mac-app-store")))]
 mod control_server;
 mod crash_guard;
 mod cursor;
@@ -168,6 +169,13 @@ fn main() -> eframe::Result {
     // First, so the panic hook and every start-up warning are recorded (`logging`).
     let logger = logging::install();
     crash_guard::install_hook();
+    for warning in photocraft_engine::macos_mas::initialize("MIXEL Photo") {
+        log::warn!("{warning}");
+    }
+    if photocraft_engine::macos_mas::enabled() && photocraft_engine::macos_mas::container_dir("MIXEL Photo").is_none() {
+        log::error!("This App Store build must run from its correctly signed sandbox app bundle.");
+        std::process::exit(2);
+    }
     // The system font scan can take seconds (minutes on some Macs): run it off the UI thread.
     photocraft_ui_egui::type_tool::warm_fonts();
     let mut control_port: Option<u16> = None;
@@ -218,6 +226,16 @@ fn main() -> eframe::Result {
             Some(s) => files.push(s.to_owned()),
             None => unreadable_paths.push(a.to_string_lossy().into_owned()),
         }
+    }
+
+    // The App Store variant has no remote-control listener or automation roots.
+    if photocraft_engine::macos_mas::enabled() {
+        control_port = None;
+        control_token = None;
+        control_token_file = None;
+        automation_read_root = None;
+        automation_write_root = None;
+        control_arg_errors.clear();
     }
 
     // A malformed control port must not silently drop the control server (issue #701): name the
@@ -309,6 +327,9 @@ fn main() -> eframe::Result {
     let tablet_monitor = std::cell::OnceCell::new();
     #[cfg(target_os = "macos")]
     let tablet_monitor = &tablet_monitor;
+
+    #[cfg(all(target_os = "macos", feature = "mac-app-store"))]
+    let _ = &control;
 
     // Read the displays' ICC profiles while the window opens (colour-managed canvas; `None`
     // where the platform has no reader).
@@ -474,6 +495,7 @@ fn main() -> eframe::Result {
                     log::warn!("couldn't remember GPU backend {}: {e}", b.name());
                 }
             });
+            #[cfg(not(all(target_os = "macos", feature = "mac-app-store")))]
             if let Some((port, token, _)) = control {
                 let rx = control_server::start(port, token, cc.egui_ctx.clone());
                 app = app.with_control(rx);
