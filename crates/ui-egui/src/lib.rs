@@ -401,6 +401,9 @@ pub struct Services {
     pub automation_save: Option<SaveFileFn>,
     /// Show an Open or Save dialog without waiting for it (see `file_dialog`).
     pub file_dialog: Option<FileDialogFn>,
+    /// Directory authority for layer batches. Without an override, the native App Store
+    /// bookmark registry is used; selecting one Save file never supplies its parent grant.
+    pub layer_export_access: Option<std::rc::Rc<dyn export_dialog::LayerExportAccess>>,
     /// Write bytes to a path (native) or trigger a download (web).
     pub write: Option<WriteFn>,
     /// Encode and write in one step on a worker thread, so a large save doesn't freeze the

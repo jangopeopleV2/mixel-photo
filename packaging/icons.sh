@@ -1,5 +1,5 @@
 #!/usr/bin/env bash
-# Regenerate every app icon from assets/app-icon/photocraft.svg (the canonical master).
+# Regenerate app icons from photocraft.svg: supplied PNG brand plus editable vector overlays.
 #
 # Needs: resvg (brew install resvg / cargo install resvg). On macOS, iconutil also writes the
 # .icns. The outputs are committed, so packaging never needs these tools.
@@ -14,9 +14,9 @@ trap 'rm -rf "$TMP"' EXIT
 
 command -v resvg >/dev/null || { echo "error: resvg not found (brew install resvg)" >&2; exit 1; }
 
-# The artwork is a full-bleed 512-unit tile (rx=112). macOS icons pad it to Apple's 824/1024 body
+# The hybrid artwork is a full-bleed 512-unit tile (rx=104). macOS pads it to Apple's 824/1024 body
 # grid (transparent margin). Windows and Linux icons crop 22 units off each side (into the
-# rounded corners) so the portrait reads at 16-48 px.
+# rounded corners) so the composition reads at 16-48 px.
 grep -q 'viewBox="0 0 512 512"' "$SVG" || { echo "error: expected viewBox=\"0 0 512 512\" in $SVG" >&2; exit 1; }
 MAC="$TMP/mac.svg"
 sed 's/viewBox="0 0 512 512"/viewBox="-62 -62 636 636"/' "$SVG" >"$MAC"
@@ -33,7 +33,7 @@ for s in 16 24 32 48 64 128 256 512; do
   render "$TIGHT" "$s" "$DIR/hicolor/${s}x${s}/apps/ch.mixel.photo.png"
 done
 mkdir -p "$DIR/hicolor/scalable/apps"
-# The lighter trace (photocraft-small.svg) keeps the scalable theme icon cheap to render.
+# The identical compact composition (photocraft-small.svg) supplies the scalable theme icon.
 cp "$DIR/photocraft-small.svg" "$DIR/hicolor/scalable/apps/ch.mixel.photo.svg"
 
 # Windows .ico.

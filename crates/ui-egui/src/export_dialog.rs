@@ -2,6 +2,8 @@
 //! with a preview and an estimated file size. The estimate encodes a small proxy and scales by
 //! pixel count, so the dialog stays instant on 36 MP documents.
 
+use std::path::{Component, Path, PathBuf};
+use std::rc::Rc;
 use std::sync::Arc;
 
 use photocraft_doc::Document;
@@ -12,6 +14,99 @@ use crate::theme::Tokens;
 use crate::{ExportSettings, PhotocraftApp};
 
 const FORMATS: [(&str, &str); 5] = [("png", "PNG"), ("jpg", "JPG"), ("webp", "WebP"), ("tif", "TIFF"), ("tga", "TGA")];
+
+/// The host's directory-access policy for an export that creates sibling files. Paths alone
+/// never grant access. Native hosts use the bookmark registry unless they supply this service.
+pub trait LayerExportAccess {
+    fn requires_directory(&self) -> bool;
+    fn resolve(&self, path: &Path) -> Result<PathBuf, String>;
+    fn directory_granted(&self, path: &Path) -> bool;
+}
+
+struct NativeLayerExportAccess;
+
+impl LayerExportAccess for NativeLayerExportAccess {
+    fn requires_directory(&self) -> bool {
+        photocraft_engine::macos_mas::enabled()
+    }
+
+    fn resolve(&self, path: &Path) -> Result<PathBuf, String> {
+        photocraft_engine::macos_mas::resolve(path)
+    }
+
+    fn directory_granted(&self, path: &Path) -> bool {
+        photocraft_engine::macos_mas::directory_granted(path)
+    }
+}
+
+const EXPORT_FOLDER: &str = "Choose the export folder (or a containing folder) to save all selected layers.";
+
+fn layer_export_access(app: &PhotocraftApp) -> Rc<dyn LayerExportAccess> {
+    app.services.layer_export_access.clone().unwrap_or_else(|| Rc::new(NativeLayerExportAccess))
+}
+
+fn batch_parent(path: &Path) -> Result<&Path, String> {
+    if !path.is_absolute() || path.components().any(|c| matches!(c, Component::ParentDir)) {
+        return Err(EXPORT_FOLDER.into());
+    }
+    path.parent().ok_or_else(|| EXPORT_FOLDER.into())
+}
+
+/// Resolve and check the entire actual output set before the first encoder or writer runs.
+/// Generate collision-free sibling names only after the directory is accessible: an ungranted
+/// directory can make an existing sibling look absent.
+fn permitted_batch_paths(path: &str, docs: &[Document], access: &dyn LayerExportAccess) -> Result<Vec<String>, String> {
+    if docs.len() < 2 || !access.requires_directory() {
+        return Ok(batch_paths(path, docs));
+    }
+    let first = access.resolve(Path::new(path))?;
+    if !access.directory_granted(batch_parent(&first)?) {
+        return Err(EXPORT_FOLDER.into());
+    }
+    let paths = batch_paths(&first.to_string_lossy(), docs);
+    for path in &paths {
+        let actual = access.resolve(Path::new(path))?;
+        if !access.directory_granted(batch_parent(&actual)?) {
+            return Err(EXPORT_FOLDER.into());
+        }
+    }
+    Ok(paths)
+}
+
+/// A Save panel authorizes its one file, not the sibling files of a layer batch. Keep the
+/// captured sources and continuation while a real Folder panel obtains that extra authority.
+fn with_layer_destination(
+    app: &mut PhotocraftApp,
+    path: String,
+    docs: Vec<Document>,
+    access: Rc<dyn LayerExportAccess>,
+    then: impl FnOnce(&mut PhotocraftApp, Vec<Document>, Vec<String>) -> Result<Value, String> + 'static,
+) -> Result<Value, String> {
+    if docs.len() > 1 && access.requires_directory() {
+        let first = access.resolve(Path::new(&path))?;
+        let parent = batch_parent(&first)?;
+        if !access.directory_granted(parent) {
+            let request = crate::FileDialogRequest::Folder { initial_dir: Some(parent.to_string_lossy().into_owned()) };
+            return app.ask_file(request, move |app, answer| {
+                let crate::FileDialogAnswer::FolderTo(folder) = answer else {
+                    return Err("the file dialog gave an unexpected answer".into());
+                };
+                let chosen = access.resolve(Path::new(&folder))?;
+                if !chosen.is_absolute() || chosen.components().any(|c| matches!(c, Component::ParentDir)) {
+                    return Err(EXPORT_FOLDER.into());
+                }
+                let first = access.resolve(Path::new(&path))?;
+                if !batch_parent(&first)?.starts_with(&chosen) {
+                    return Err(EXPORT_FOLDER.into());
+                }
+                let paths = permitted_batch_paths(&path, &docs, access.as_ref())?;
+                then(app, docs, paths)
+            });
+        }
+    }
+    let paths = permitted_batch_paths(&path, &docs, access.as_ref())?;
+    then(app, docs, paths)
+}
 
 /// Preferences ▸ remembered dialog settings: Export As writes the settings it was used with
 /// last under its command id and seeds the next dialog from them, as Fill, Liquify and the
@@ -128,23 +223,25 @@ pub fn quick_export_selected_layers_png(app: &mut PhotocraftApp) -> Result<Value
     let docs: Vec<_> =
         layers.into_iter().map(|id| photocraft_engine::layer_menu_cmds::layer_document(&st.doc, id).map_err(|e| e.to_string())).collect::<Result<_, _>>()?;
     let suggested = format!("{}.png", export_name(&st.doc.name));
+    let access = layer_export_access(app);
     app.pick_save(&suggested, move |app, path| {
         if !path.to_ascii_lowercase().ends_with(".png") {
             return Err("Quick Export as PNG writes .png files".into());
         }
-        let paths = batch_paths(&path, &docs);
-        let mut exported = Vec::new();
-        for (doc, path) in docs.iter().zip(paths) {
-            let export = app.services.export.as_ref().ok_or("no exporter configured")?;
-            let (bytes, warnings) = export(doc, &path, &ExportSettings { xmp_all: false, ..Default::default() })?;
-            let write = app.services.write.as_mut().ok_or("no writer configured")?;
-            write(&path, &bytes)?;
-            crate::notices::io_warnings(app, &format!("Exported {}", crate::file_open::display_name(&path)), &warnings);
-            exported.push(json!({"path": path, "bytes": bytes.len(), "warnings": warnings}));
-        }
-        app.ui.status = format!("Exported {} PNG files", exported.len());
-        app.ui.status_error = false;
-        Ok(json!({"files": exported}))
+        with_layer_destination(app, path, docs, access, |app, docs, paths| {
+            let mut exported = Vec::new();
+            for (doc, path) in docs.iter().zip(paths) {
+                let export = app.services.export.as_ref().ok_or("no exporter configured")?;
+                let (bytes, warnings) = export(doc, &path, &ExportSettings { xmp_all: false, ..Default::default() })?;
+                let write = app.services.write.as_mut().ok_or("no writer configured")?;
+                write(&path, &bytes)?;
+                crate::notices::io_warnings(app, &format!("Exported {}", crate::file_open::display_name(&path)), &warnings);
+                exported.push(json!({"path": path, "bytes": bytes.len(), "warnings": warnings}));
+            }
+            app.ui.status = format!("Exported {} PNG files", exported.len());
+            app.ui.status_error = false;
+            Ok(json!({"files": exported}))
+        })
     })
 }
 
@@ -435,23 +532,26 @@ fn confirm_layers(app: &mut PhotocraftApp, f: &Map<String, Value>, ids: &[photoc
     let stem = st.doc.name.rsplit_once('.').map_or(st.doc.name.as_str(), |(a, _)| a);
     let suggested = format!("{}.{}", export_name(stem), s_fmt(f));
     let (f, settings) = (f.clone(), settings(f));
+    let access = layer_export_access(app);
     app.pick_save(&suggested, move |app, path| {
-        let mut exported = Vec::new();
-        for (doc, path) in docs.iter().zip(batch_paths(&path, &docs)) {
-            let out = export_document(doc, &f, None)?;
-            let export = app.services.export.as_ref().ok_or("no exporter configured")?;
-            let (bytes, warnings) = export(&out, &path, &settings)?;
-            let write = app.services.write.as_mut().ok_or("no writer configured")?;
-            write(&path, &bytes)?;
-            let template = "Exported {path}";
-            let what = crate::i18n::fmt(tl!(template), &[("path", &crate::file_open::display_name(&path))]);
-            crate::notices::io_warnings(app, &what, &warnings);
-            exported.push(json!({"path": path, "bytes": bytes.len(), "warnings": warnings}));
-        }
-        let template = "Exported {n} files";
-        app.ui.status = crate::i18n::fmt(tl!(template), &[("n", &exported.len().to_string())]);
-        app.ui.status_error = false;
-        Ok(json!({"files": exported}))
+        with_layer_destination(app, path, docs, access, move |app, docs, paths| {
+            let mut exported = Vec::new();
+            for (doc, path) in docs.iter().zip(paths) {
+                let out = export_document(doc, &f, None)?;
+                let export = app.services.export.as_ref().ok_or("no exporter configured")?;
+                let (bytes, warnings) = export(&out, &path, &settings)?;
+                let write = app.services.write.as_mut().ok_or("no writer configured")?;
+                write(&path, &bytes)?;
+                let template = "Exported {path}";
+                let what = crate::i18n::fmt(tl!(template), &[("path", &crate::file_open::display_name(&path))]);
+                crate::notices::io_warnings(app, &what, &warnings);
+                exported.push(json!({"path": path, "bytes": bytes.len(), "warnings": warnings}));
+            }
+            let template = "Exported {n} files";
+            app.ui.status = crate::i18n::fmt(tl!(template), &[("n", &exported.len().to_string())]);
+            app.ui.status_error = false;
+            Ok(json!({"files": exported}))
+        })
     })
 }
 
@@ -489,6 +589,10 @@ fn quick_export(app: &mut PhotocraftApp, p: Value) -> Result<Value, String> {
     app.ui.status = crate::i18n::fmt(tl!(template), &[("path", r["path"].as_str().unwrap_or_default())]);
     Ok(r)
 }
+
+#[cfg(test)]
+#[path = "export_dialog_batch_tests.rs"]
+mod batch_tests;
 
 #[cfg(test)]
 mod tests {

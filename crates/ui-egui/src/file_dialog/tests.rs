@@ -6,6 +6,24 @@ use std::rc::Rc;
 /// The requests the fake dialog service was given, with their replies: dialogs the user is still in.
 type Open = Rc<RefCell<Vec<(FileDialogRequest, FileDialogReply)>>>;
 
+/// This fake host models the ordinary, unrestricted writer used by these dialog tests.
+/// The sandboxed host and the same menu continuations are covered in export_dialog::batch_tests.
+struct OrdinaryLayerExportAccess;
+
+impl crate::export_dialog::LayerExportAccess for OrdinaryLayerExportAccess {
+    fn requires_directory(&self) -> bool {
+        false
+    }
+
+    fn resolve(&self, path: &std::path::Path) -> Result<std::path::PathBuf, String> {
+        Ok(path.to_path_buf())
+    }
+
+    fn directory_granted(&self, _: &std::path::Path) -> bool {
+        true
+    }
+}
+
 /// An app with an untitled document, whose file dialogs stay open until the test answers them, and
 /// whose writer records the paths it wrote.
 fn app() -> (PhotocraftApp, Open, Rc<RefCell<Vec<String>>>) {
@@ -18,6 +36,7 @@ fn app() -> (PhotocraftApp, Open, Rc<RefCell<Vec<String>>>) {
             Ok(())
         })),
         file_dialog: Some(Box::new(move |request, _parent, reply| held.borrow_mut().push((request, reply)))),
+        layer_export_access: Some(Rc::new(OrdinaryLayerExportAccess)),
         ..Default::default()
     };
     let mut app = PhotocraftApp::new(photocraft_engine::Session::new(), services);
