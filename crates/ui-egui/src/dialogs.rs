@@ -485,6 +485,10 @@ fn about_tab_body(app: &mut PhotocraftApp, ui: &mut egui::Ui, tab: &str) {
                 crate::links::discord_button(app, ui, 220.0);
                 ui.add_space(8.0);
                 crate::links::link_row(app, ui);
+                ui.add_space(6.0);
+                if ui.link(tl!("Privacy Policy")).on_hover_text("https://www.mixel.ch/legal/craft/privacy/").clicked() {
+                    crate::links::open(app, ui.ctx(), "https://www.mixel.ch/legal/craft/privacy/");
+                }
             });
             ui.add_space(10.0);
             ui.weak("egui · wgpu · photocraft-engine");
