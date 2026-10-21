@@ -9,7 +9,7 @@
 # Clean-room: every entry was written from the plain meaning of the English label using ordinary
 # Italian computing vocabulary (livello, pennello, selezione, quadro ...). No proprietary localisation
 # resource, string table or product UI was consulted or copied; add entries the same way.
-# Product and technology names (MIXEL Photo, ArtCraft, OpenType, CMYK, Lab ...) stay in Latin
+# Product and technology names (MIXEL Photo, OpenType, CMYK, Lab ...) stay in Latin
 # letters; the trailing … of dialog commands is kept.
 
 # Guide layout dialog
@@ -771,8 +771,7 @@
 	About MIXEL Photo	Informazioni su MIXEL Photo
 	MIXEL Photo Website	Sito web MIXEL Photo
 	MIXEL Photo on GitHub	MIXEL Photo su GitHub
-	ArtCraft Website	Sito web ArtCraft
-	Join the ArtCraft Discord…	Unisciti al Discord di ArtCraft…
+	MIXEL Website	Sito web MIXEL
 	Report an Issue…	Segnala un problema…
 	WIA Support…	Supporto WIA…
 	Apply	Applica
@@ -1055,7 +1054,6 @@
 	Diffusion	Diffusione
 	Discard the embedded profile (don't color manage)	Scarta profilo incorporato (non gestire colore)
 	Discontiguous	Non contiguo
-	Discord	Discord
 	Dismiss	Chiudi
 	Display P3	Display P3
 	Display Text	Mostra testo
@@ -1188,7 +1186,6 @@
 	Invert All	Inverti tutto
 	Invert has no settings.	Inverti non ha impostazioni.
 	Italic	Corsivo
-	Join us on Discord	Unisciti al nostro Discord
 	Justify all	Giustifica tutto
 	Justify last centered	Giustifica ultimo centrato
 	Justify last left	Giustifica ultimo a sinistra
@@ -1595,7 +1592,6 @@
 	Apple Watch 45mm	Apple Watch 45mm
 	Aqua	Acqua
 	Art & Illustration	Arte e illustrazione
-	ArtCraft	ArtCraft
 	Background Eraser Tool	Strumento Gomma per sfondo
 	Bevel & Emboss	Smusso e rilievo
 	Blend Mode	Metodo di fusione
@@ -3480,7 +3476,6 @@ layerLabel	No Color	Nessun colore
 	Custom Pixel Aspect Ratio	Proporzioni pixel personalizzate
 	32-bit Preview Options	Opzioni anteprima 32 bit
 	New Guide	Nuova guida
-	Join the ArtCraft Discord	Unisciti al Discord di ArtCraft
 	Report an Issue	Segnala un problema
 	Load Files into Stack	Carica file in pila
 	Statistics	Statistiche
@@ -4034,7 +4029,6 @@ navigator	Zoom	Zoom
 	on	attivo
 	off	disattivo
 	This adjustment ({key}) is kept as imported and can't be edited yet.	Questa regolazione ({key}) resta come è stata importata e non si può ancora modificare.
-	Join the ArtCraft Discord ({url})	Unisciti al Discord di ArtCraft ({url})
 	{index} of {total}	{index} di {total}
 	{shortcut} assigned.	{shortcut} assegnata.
 	{shortcut} is already in use by {commands} and will be removed from it when you click OK.	{shortcut} è già usata da {commands} e verrà rimossa quando fai clic su OK.

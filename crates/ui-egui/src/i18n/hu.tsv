@@ -12,7 +12,7 @@
 # Clean-room: every entry was written from the plain meaning of the English label using ordinary
 # Hungarian image-editing vocabulary (réteg, maszk, kijelölés ...). No proprietary localisation
 # resource, string table or product UI was consulted or copied; add entries the same way.
-# Product and technology names (MIXEL Photo, ArtCraft, OpenType, CMYK, Lab ...) stay in Latin
+# Product and technology names (MIXEL Photo, OpenType, CMYK, Lab ...) stay in Latin
 # letters; the trailing "…" of dialog commands is kept. Plural rule: a count is followed by the
 # singular noun in Hungarian, so every @plural entry has a single form.
 
@@ -442,7 +442,7 @@
 	Artboard Guides	Rajztábla-segédvonalak
 	Artboards to Files	Rajztáblák fájlokba
 	Artboards to PDF	Rajztáblák PDF-be
-	ArtCraft Website	ArtCraft-weboldal
+	MIXEL Website	MIXEL-weboldal
 	Average	Átlag
 	Background From Layer	Háttér a rétegből
 	Bitmap…	Bittérkép…
@@ -600,8 +600,6 @@
 	Internet Standard RGB	Internetes szabványos RGB
 	Inverse	Megfordítás
 	Iris Blur…	Íriszelmosás…
-	Join the ArtCraft Discord	Csatlakozás az ArtCraft Discordhoz
-	Join the ArtCraft Discord…	Csatlakozás az ArtCraft Discordhoz…
 	Language	Nyelv
 	Language Options	Nyelvi beállítások
 	Large	Nagy
@@ -1747,7 +1745,6 @@ layerLabel	Magenta	Bíbor
 	Delete Tool Preset	Eszköz-előbeállítás törlése
 	Delete tool preset	Eszköz-előbeállítás törlése
 	Delete Workspace	Munkaterület törlése
-	Discord	Discord
 	Doc: {w} × {h} px	Dok.: {w} × {h} px
 	Drag a box or click four corners · drag the corners onto the edges of a skewed shape · {commit} commits · Esc cancels	Húzz egy keretet, vagy kattints a négy sarokra · húzd a sarkokat a ferde alakzat éleire · {commit}: véglegesítés · Esc: megszakítás
 	Drag a crop box · drag inside to move · edges resize ({ratio} ratio, {centre} centre) · Space moves while drawing · arrows nudge · X swaps orientation · {commit} commits · Esc cancels	Húzz egy körbevágási keretet · belül húzva mozgatod · az élekkel átméretezed ({ratio}: arány, {centre}: középről) · Space: mozgatás rajzolás közben · nyilak: léptetés · X: tájolás cseréje · {commit}: véglegesítés · Esc: megszakítás
@@ -1802,7 +1799,6 @@ layerLabel	Magenta	Bíbor
 	Intersect with	Metszet ezzel
 	Intersect with selection  ({key})	Metszet a kijelöléssel  ({key})
 	Invalid panel layout; restored the default dock	Érvénytelen panelelrendezés; az alapértelmezett dokkolás visszaállítva
-	Join the ArtCraft Discord ({url})	Csatlakozz az ArtCraft Discord-szerveréhez ({url})
 	Keyboard Shortcuts	Billentyűparancsok
 	Kind	Fajta
 	Lasso	Lasszó
@@ -3028,7 +3024,6 @@ cameraRaw	Yellow	Sárga
 	Arch	Boltív
 	Area	Terület
 	Artboard Tool	Rajztábla
-	ArtCraft	ArtCraft
 	Ask	Rákérdezés
 	Aspect Ratio	Oldalarány
 	Assign Profile	Profil hozzárendelése
@@ -3284,7 +3279,6 @@ cameraRaw	Yellow	Sárga
 	Interval	Intervallum
 	Invalid {mode} profile	Érvénytelen profil ({mode})
 	Its layers don't fit the GPU memory budget. Raising Memory usage in Preferences › Performance raises the budget, up to a quarter of this computer's memory.	A dokumentum rétegei nem férnek el a GPU memóriakeretében. Ha a Beállítások › Teljesítmény alatt növeled a memóriahasználatot, a keret is nő, legfeljebb a számítógép memóriájának negyedéig.
-	Join us on Discord	Csatlakozz hozzánk a Discordon
 	Keep Using CPU	Marad a CPU
 	Kernel	Szűrőmag
 	Keyboard	Billentyűzet

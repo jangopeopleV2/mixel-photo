@@ -149,8 +149,7 @@ mod linux {
     use photocraft_engine::display_color::Display;
     use x11rb::connection::Connection as _;
     use x11rb::protocol::randr;
-    use zbus::blocking::{connection::Builder, proxy::Proxy};
-    use zbus::zvariant::OwnedObjectPath;
+    use zbus::{OwnedObjectPath, Proxy, connection::Builder};
 
     use super::Detection;
 
@@ -244,27 +243,27 @@ mod linux {
     }
 
     fn colord_profiles() -> Result<HashMap<String, Vec<IccProfile>>, String> {
-        let connection = Builder::system()
-            .map_err(|e| format!("couldn't connect to the system bus: {e}"))?
-            .method_timeout(Duration::from_secs(2))
-            .build()
-            .map_err(|e| format!("couldn't connect to the system bus: {e}"))?;
-        let manager = Proxy::new(&connection, COLORD, COLORD_ROOT, COLORD_MANAGER).map_err(|e| format!("couldn't access colord: {e}"))?;
+        let connection =
+            zbus::block_on(Builder::system().method_timeout(Duration::from_secs(2)).build()).map_err(|e| format!("couldn't connect to the system bus: {e}"))?;
+        let manager = zbus::block_on(Proxy::new(&connection, COLORD, COLORD_ROOT, COLORD_MANAGER)).map_err(|e| format!("couldn't access colord: {e}"))?;
         let devices: Vec<OwnedObjectPath> =
-            manager.call("GetDevicesByKind", &("display",)).map_err(|e| format!("colord couldn't list display devices: {e}"))?;
+            zbus::block_on(manager.call("GetDevicesByKind", &("display",))).map_err(|e| format!("colord couldn't list display devices: {e}"))?;
         let mut profiles: HashMap<String, Vec<IccProfile>> = HashMap::new();
         for device_path in devices {
-            let device = Proxy::new(&connection, COLORD, &device_path, COLORD_DEVICE).map_err(|e| format!("couldn't access a colord display device: {e}"))?;
-            let metadata: HashMap<String, String> = device.get_property("Metadata").map_err(|e| format!("couldn't read colord display metadata: {e}"))?;
+            let device = zbus::block_on(Proxy::new(&connection, COLORD, &device_path, COLORD_DEVICE))
+                .map_err(|e| format!("couldn't access a colord display device: {e}"))?;
+            let metadata: HashMap<String, String> =
+                zbus::block_on(device.get_property("Metadata")).map_err(|e| format!("couldn't read colord display metadata: {e}"))?;
             let Some(output_name) = metadata.get("XRANDR_name").filter(|name| !name.is_empty()) else { continue };
             // `*` is colord's default profile qualifier. A display without one is kept, with no
             // ICC, so the engine reports the normal sRGB fallback.
-            let profile_path: OwnedObjectPath = match device.call("GetProfileForQualifiers", &(vec!["*"],)) {
+            let profile_path: OwnedObjectPath = match zbus::block_on(device.call("GetProfileForQualifiers", &(vec!["*"],))) {
                 Ok(path) => path,
                 Err(_) => continue,
             };
-            let profile = Proxy::new(&connection, COLORD, &profile_path, COLORD_PROFILE).map_err(|e| format!("couldn't access a colord ICC profile: {e}"))?;
-            let filename: String = match profile.get_property::<String>("Filename") {
+            let profile = zbus::block_on(Proxy::new(&connection, COLORD, &profile_path, COLORD_PROFILE))
+                .map_err(|e| format!("couldn't access a colord ICC profile: {e}"))?;
+            let filename: String = match zbus::block_on(profile.get_property::<String>("Filename")) {
                 Ok(filename) if !filename.is_empty() => filename,
                 _ => continue,
             };

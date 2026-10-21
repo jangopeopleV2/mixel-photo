@@ -212,12 +212,12 @@ const ICONS_KEY: &str = "icon-theme";
 
 /// A string setting from the portal, unwrapping the variants some portals nest it in.
 #[cfg(target_os = "linux")]
-fn portal_string(value: zbus::zvariant::OwnedValue) -> Option<String> {
-    let mut value: zbus::zvariant::Value<'_> = value.into();
+fn portal_string(value: zbus::OwnedVariant) -> Option<String> {
+    let mut value: zbus::Variant<'_> = value.into();
     for _ in 0..4 {
         match value {
-            zbus::zvariant::Value::Value(inner) => value = *inner,
-            zbus::zvariant::Value::Str(s) => return Some(s.to_string()),
+            zbus::Variant::Variant(inner) => value = *inner,
+            zbus::Variant::Str(s) => return Some(s.to_string()),
             _ => return None,
         }
     }
@@ -259,17 +259,19 @@ pub fn service() -> Option<photocraft_ui_egui::CaptionStyleFn> {
                 return;
             };
             // Subscribe before the first read, so a change during start-up isn't lost.
-            let signals = proxy.receive_signal("SettingChanged").ok();
+            use futures_lite::StreamExt;
+            let signals = zbus::block_on(proxy.receive_signal("SettingChanged")).ok();
             let read = |namespace: &str, key: &str| {
-                let value: Option<zbus::zvariant::OwnedValue> = proxy.call("Read", &(namespace, key)).ok();
+                let value: Option<zbus::OwnedVariant> = zbus::block_on(proxy.call("Read", &(namespace, key))).ok();
                 value.and_then(portal_string)
             };
             found.layout = read(WM_NAMESPACE, LAYOUT_KEY).or(found.layout.take());
             found.icon_theme = read(INTERFACE_NAMESPACE, ICONS_KEY).or(found.icon_theme.take());
             publish(&found);
             let _ = ready.send(());
-            for message in signals.into_iter().flatten() {
-                let Ok((namespace, key, value)) = message.body().deserialize::<(String, String, zbus::zvariant::OwnedValue)>() else { continue };
+            let Some(mut signals) = signals else { return };
+            while let Some(message) = zbus::block_on(signals.next()) {
+                let Ok((namespace, key, value)) = message.body().deserialize::<(String, String, zbus::OwnedVariant)>() else { continue };
                 match (namespace.as_str(), key.as_str()) {
                     (WM_NAMESPACE, LAYOUT_KEY) => found.layout = portal_string(value),
                     (INTERFACE_NAMESPACE, ICONS_KEY) => found.icon_theme = portal_string(value),
@@ -374,10 +376,10 @@ mod tests {
 
     #[test]
     fn portal_strings_unwrap_nested_variants() {
-        use zbus::zvariant::{OwnedValue, Value};
-        let nested = Value::Value(Box::new(Value::Value(Box::new(Value::from("appmenu:close")))));
-        assert_eq!(portal_string(OwnedValue::try_from(nested).unwrap()).as_deref(), Some("appmenu:close"));
-        assert_eq!(portal_string(OwnedValue::try_from(Value::U32(7)).unwrap()), None);
+        use zbus::{OwnedVariant, Variant};
+        let nested = Variant::Variant(Box::new(Variant::Variant(Box::new(Variant::from("appmenu:close")))));
+        assert_eq!(portal_string(OwnedVariant::try_from(nested).unwrap()).as_deref(), Some("appmenu:close"));
+        assert_eq!(portal_string(OwnedVariant::try_from(Variant::U32(7)).unwrap()), None);
     }
 
     #[test]

@@ -613,9 +613,9 @@ mod tests {
             for a in &widgets {
                 assert!(a.right() <= min.left(), "{a:?} runs into the caption buttons at {width}");
             }
-            // Wide windows show the whole group; the narrowest drops Discord (also Help › Discord).
+            // No upstream community control is present at any window width.
             let has_discord = texts(&out).iter().any(|(t, _)| t == "Discord");
-            assert_eq!(has_discord, width > 1000.0, "Discord at {width}");
+            assert!(!has_discord, "Discord must be absent at {width}");
         }
     }
 

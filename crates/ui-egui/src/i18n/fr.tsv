@@ -16,7 +16,7 @@
 # Conventions: menus are nouns (Fichier, Édition, Image ...), commands are infinitives (Ouvrir…,
 # Enregistrer sous…), sentence case. French typography: a no-break space (U+00A0) before
 # « : ; ? ! » and "%", and inside guillemets « … ». Product and technology names (MIXEL Photo,
-# ArtCraft, OpenType, Lab ...) stay as they are; RGB/CMYK read RVB/CMJN; the trailing "…" of
+# OpenType, Lab ...) stay as they are; RGB/CMYK read RVB/CMJN; the trailing "…" of
 # dialog commands is kept.
 
 # Guide layout dialog
@@ -764,8 +764,7 @@
 	About MIXEL Photo	À propos de MIXEL Photo
 	MIXEL Photo Website	Site web de MIXEL Photo
 	MIXEL Photo on GitHub	MIXEL Photo sur GitHub
-	ArtCraft Website	Site web d'ArtCraft
-	Join the ArtCraft Discord…	Rejoindre le Discord d'ArtCraft…
+	MIXEL Website	Site web d'MIXEL
 	Report an Issue…	Signaler un problème…
 	WIA Support…	Prise en charge de WIA…
 	Apply	Appliquer
@@ -1043,7 +1042,6 @@
 	Diffusion	Diffusion
 	Discard the embedded profile (don't color manage)	Ignorer le profil incorporé (sans gestion des couleurs)
 	Discontiguous	Non contigu
-	Discord	Discord
 	Dismiss	Fermer
 	Display P3	Display P3
 	Display Text	Texte affiché
@@ -1172,7 +1170,6 @@
 	Invert All	Tout inverser
 	Invert has no settings.	Inverser n'a aucun réglage.
 	Italic	Italique
-	Join us on Discord	Rejoignez-nous sur Discord
 	Justify all	Justifier tout
 	Justify last centered	Justifier, dernière ligne centrée
 	Justify last left	Justifier, dernière ligne à gauche
@@ -1575,7 +1572,6 @@
 	Apple Watch 45mm	Apple Watch 45 mm
 	Aqua	Aqua
 	Art & Illustration	Art et illustration
-	ArtCraft	ArtCraft
 	Background Eraser Tool	Outil Gomme d'arrière-plan
 	Bevel & Emboss	Biseau et relief
 	Blend Mode	Mode de fusion

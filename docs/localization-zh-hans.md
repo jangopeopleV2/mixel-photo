@@ -36,7 +36,7 @@ language manually there.
 Keep English source keys, contexts, command IDs, placeholders and escapes intact.
 Retain the trailing `…` on commands that open a dialog. Missing translations use
 the framework's English fallback. User-supplied names and document data are not
-translated. Product names and technology names such as PhotoCraft, ArtCraft,
+translated. Product names and technology names such as MIXEL Photo,
 OpenType, RGB, CMYK and Lab retain their spelling. Status messages, errors and
 automation output remain English as described in [UI design](ui-design.md#localisation);
 complete catalog coverage does not claim those strings are translated.

@@ -1,9 +1,9 @@
 <!-- MIXEL-HEADER -->
 # MIXEL Photo
 
-**MIXEL Photo** is part of the MIXEL creative suite: an open-source, pure-Rust alternative to Adobe Photoshop for macOS, Windows, Linux and the web.
+**MIXEL Photo** is part of [MIXEL Creative Apps](https://www.mixel.ch).
 
-Maintained by [MIXEL](https://mixel.ch). Based on [storytold/photocraft](https://github.com/storytold/photocraft) from the ArtCraft Crafting Apps by Brandon Thomas; licensed under Apache-2.0 / MIT (see `LICENSE-APACHE`, `LICENSE-MIT`, `NOTICE`). Upstream changes are merged from the `upstream` remote and re-branded with `rebrand.sh`.
+Maintained by [MIXEL](https://www.mixel.ch). Based on [storytold/photocraft](https://github.com/storytold/photocraft) by Brandon Thomas and upstream contributors; licensed under Apache-2.0 / MIT (see `LICENSE-APACHE`, `LICENSE-MIT`, `NOTICE`). Upstream changes are merged from the `upstream` remote and re-branded with `rebrand.sh`.
 
 ---
 
@@ -22,14 +22,11 @@ Maintained by [MIXEL](https://mixel.ch). Based on [storytold/photocraft](https:/
   <img alt="Status: early alpha" src="https://img.shields.io/badge/status-early%20alpha-d69e2e?style=flat-square">
 </p>
 
-<p align="center">
-  <a href="https://discord.gg/artcraft"><img alt="Join the ArtCraft community on Discord" src="https://img.shields.io/badge/Join%20us%20on%20Discord-5865F2?style=for-the-badge&logo=discord&logoColor=white" height="40"></a>
-</p>
 
 <p align="center">
   <a href="https://github.com/jangopeopleV2/mixel-photo"><b>MIXEL Photo project page</b></a> ·
-  <a href="https://getartcraft.com/">ArtCraft</a> ·
-  <a href="https://getartcraft.com/apps">All Crafting Apps</a>
+  <a href="https://www.mixel.ch/">MIXEL Website</a> ·
+  <a href="https://www.mixel.ch">MIXEL Creative Apps</a>
 </p>
 
 <br>
@@ -42,8 +39,6 @@ Maintained by [MIXEL](https://mixel.ch). Based on [storytold/photocraft](https:/
 </p>
 
 > [!NOTE]
-> **ArtCraft is a community of artists from all walks of life.** Digital, generative, music,
-> games &mdash; if you make things, you're one of us. **[Come say hi on Discord](https://discord.gg/artcraft).**
 
 <p align="center">
   <a href="#features">Features</a> ·
@@ -53,8 +48,7 @@ Maintained by [MIXEL](https://mixel.ch). Based on [storytold/photocraft](https:/
   <a href="#under-the-hood">Under the hood</a> ·
   <a href="#get-started">Get started</a> ·
   <a href="#downloads">Downloads</a> ·
-  <a href="#the-crafting-apps">Crafting Apps</a> ·
-  <a href="https://discord.gg/artcraft">Discord</a>
+  <a href="#mixel-creative-apps">MIXEL Creative Apps</a> ·
 </p>
 
 <br>
@@ -298,7 +292,7 @@ photocraft
 Maintainers: [`docs/releasing.md`](docs/releasing.md) explains how releases are built, signed and published.
 
 > [!IMPORTANT]
-> **Status:** MIXEL Photo is in early alpha, and we want to be straight about where it stands: much of Photoshop's feature surface exists in some form, but **it is not yet a Photoshop replacement for daily professional work**. The biggest gaps are AI/generative features, 15 missing tools, depth in typography and pro workflows, and plug-in compatibility. Every Photoshop menu item is wired to a command ([`docs/parity-checklist.md`](docs/parity-checklist.md)), but that measures wiring, not behaviour. The honest, dimension-by-dimension picture and where we're going next are in the [roadmap](ROADMAP.md) and [parity assessment](docs/target-app-parity.md). Expect rough edges, and please file issues (include your OS, document size, layer count and a screenshot). You can also tell us what broke on [Discord](https://discord.gg/artcraft).
+> **Status:** MIXEL Photo is in early alpha, and we want to be straight about where it stands: much of Photoshop's feature surface exists in some form, but **it is not yet a Photoshop replacement for daily professional work**. The biggest gaps are AI/generative features, 15 missing tools, depth in typography and pro workflows, and plug-in compatibility. Every Photoshop menu item is wired to a command ([`docs/parity-checklist.md`](docs/parity-checklist.md)), but that measures wiring, not behaviour. The honest, dimension-by-dimension picture and where we're going next are in the [roadmap](ROADMAP.md) and [parity assessment](docs/target-app-parity.md). Expect rough edges, and please file issues (include your OS, document size, layer count and a screenshot). You can also tell us what broke on [MIXEL Website](https://www.mixel.ch).
 
 ## Documentation
 
@@ -319,7 +313,7 @@ sha256-verified. Fetch them with `cargo xtask corpus --all` and run the tests wi
 
 ## Downloads
 
-**New to MIXEL Photo?** Download it from the [MIXEL Photo page on getartcraft.com](https://github.com/jangopeopleV2/mixel-photo). That's the easiest way to install it.
+**New to MIXEL Photo?** Download it from the [MIXEL Photo project page](https://github.com/jangopeopleV2/mixel-photo). That's the easiest way to install it.
 
 **Want a specific build or format?** On GitHub, the [latest release](https://github.com/storytold/photocraft/releases/latest) has every build listed below, and [all releases](https://github.com/storytold/photocraft/releases) has earlier versions and their notes. `<ver>` in the file names is the version number, and `SHA256SUMS.txt` lists a checksum for every file.
 
@@ -364,45 +358,35 @@ RISC-V (riscv64): `photocraft-<ver>-linux-riscv64.tar.gz` only, built against Ub
 |---|---|---|
 | Static site | `photocraft-web-<ver>.zip` | Runs in a modern browser; host it on any static server |
 
-## The Crafting Apps
+## MIXEL Creative Apps
 
-MIXEL Photo is one of the **Crafting Apps**: free, open-source creative tools from the
-[ArtCraft](https://getartcraft.com/) team, each written from scratch in Rust and each able to
-stand on its own.
+MIXEL Photo is part of [MIXEL Creative Apps](https://www.mixel.ch), a suite of open-source creative tools. Upstream authors and licences are credited below.
 
 | | App | What it's for | Code | Learn more |
 |:-:|---|---|---|---|
 | <img src="https://raw.githubusercontent.com/storytold/photocraft/main/assets/app-icon/hicolor/64x64/apps/ch.mixel.photo.png" alt="" width="32" height="32"> | **MIXEL Photo** | **Image editing: layers, masks, type and real PSD files · you are here** | [GitHub](https://github.com/storytold/photocraft) | [Website](https://github.com/jangopeopleV2/mixel-photo) |
-| <img src="https://raw.githubusercontent.com/storytold/vectorcraft/main/assets/app-icon/hicolor/64x64/apps/ch.mixel.vector.png" alt="" width="32" height="32"> | **MIXEL Vector** | Vector illustration | [GitHub](https://github.com/storytold/vectorcraft) | [Website](https://getartcraft.com/apps/vectorcraft) |
-| <img src="https://raw.githubusercontent.com/storytold/filmcraft/main/assets/app-icon/hicolor/64x64/apps/ch.mixel.film.png" alt="" width="32" height="32"> | **MIXEL Film** | Video editing, color and sound | [GitHub](https://github.com/storytold/filmcraft) | [Website](https://getartcraft.com/apps/filmcraft) |
-| <img src="https://raw.githubusercontent.com/storytold/lightcraft/main/assets/app-icon/hicolor/64x64/apps/ch.mixel.light.png" alt="" width="32" height="32"> | **MIXEL Light** | Photo library and raw development | [GitHub](https://github.com/storytold/lightcraft) | [Website](https://getartcraft.com/apps/lightcraft) |
-| <img src="https://raw.githubusercontent.com/storytold/pdfcraft/main/assets/app-icon/hicolor/64x64/apps/ch.mixel.print.png" alt="" width="32" height="32"> | **MIXEL Print** | Reading, organizing and protecting PDFs | [GitHub](https://github.com/storytold/pdfcraft) | [Website](https://getartcraft.com/apps/pdfcraft) |
-| <img src="https://raw.githubusercontent.com/storytold/effectcraft/main/assets/app-icon/hicolor/64x64/apps/ch.mixel.effects.png" alt="" width="32" height="32"> | **MIXEL Effects** | Motion graphics and visual effects | [GitHub](https://github.com/storytold/effectcraft) | [Website](https://getartcraft.com/apps/effectcraft) |
-| <img src="https://raw.githubusercontent.com/storytold/designcraft/main/assets/app-icon/hicolor/64x64/apps/ch.mixel.design.png" alt="" width="32" height="32"> | **MIXEL Design** | Page layout and publishing | [GitHub](https://github.com/storytold/designcraft) | [Website](https://getartcraft.com/apps/designcraft) |
+| <img src="https://raw.githubusercontent.com/storytold/vectorcraft/main/assets/app-icon/hicolor/64x64/apps/ch.mixel.vector.png" alt="" width="32" height="32"> | **MIXEL Vector** | Vector illustration | [GitHub](https://github.com/storytold/vectorcraft) | [Website](https://www.mixel.ch) |
+| <img src="https://raw.githubusercontent.com/storytold/filmcraft/main/assets/app-icon/hicolor/64x64/apps/ch.mixel.film.png" alt="" width="32" height="32"> | **MIXEL Film** | Video editing, color and sound | [GitHub](https://github.com/storytold/filmcraft) | [Website](https://www.mixel.ch) |
+| <img src="https://raw.githubusercontent.com/storytold/lightcraft/main/assets/app-icon/hicolor/64x64/apps/ch.mixel.light.png" alt="" width="32" height="32"> | **MIXEL Light** | Photo library and raw development | [GitHub](https://github.com/storytold/lightcraft) | [Website](https://www.mixel.ch) |
+| <img src="https://raw.githubusercontent.com/storytold/pdfcraft/main/assets/app-icon/hicolor/64x64/apps/ch.mixel.print.png" alt="" width="32" height="32"> | **MIXEL Print** | Reading, organizing and protecting PDFs | [GitHub](https://github.com/storytold/pdfcraft) | [Website](https://www.mixel.ch) |
+| <img src="https://raw.githubusercontent.com/storytold/effectcraft/main/assets/app-icon/hicolor/64x64/apps/ch.mixel.effects.png" alt="" width="32" height="32"> | **MIXEL Effects** | Motion graphics and visual effects | [GitHub](https://github.com/storytold/effectcraft) | [Website](https://www.mixel.ch) |
+| <img src="https://raw.githubusercontent.com/storytold/designcraft/main/assets/app-icon/hicolor/64x64/apps/ch.mixel.design.png" alt="" width="32" height="32"> | **MIXEL Design** | Page layout and publishing | [GitHub](https://github.com/storytold/designcraft) | [Website](https://www.mixel.ch) |
 
-And [**ArtCraft**](https://getartcraft.com/) itself, our AI image and video studio for artists who want real control.
 
 The Crafting Apps share the same conventions: clean-room and pure Rust, native on macOS, Windows and Linux, in the browser via WebAssembly, and fully drivable by agents.
 
 <br>
 
-<p align="center">
-  <a href="https://discord.gg/artcraft"><img alt="Join the ArtCraft community on Discord" src="https://img.shields.io/badge/Join%20us%20on%20Discord-5865F2?style=for-the-badge&logo=discord&logoColor=white" height="40"></a>
-</p>
 
-<h3 align="center">Come make things with us</h3>
+<h3 align="center">Explore MIXEL Creative Apps</h3>
 
 <p align="center">
-  Our Discord is where artists of every kind hang out: people who paint, shoot, draw, cut film,
-  set type, and people still figuring out what they like to make. Share what you're working on,
-  ask for help, tell us what's broken, or tell us what you wish these tools could do.
-  Whatever your medium and however long you've been at it, you're welcome here.
+  Discover the MIXEL creative suite and find project information at the MIXEL Website.
 </p>
 
 <p align="center">
-  <a href="https://discord.gg/artcraft"><b>discord.gg/artcraft</b></a> ·
-  <a href="https://getartcraft.com/">getartcraft.com</a> ·
-  <a href="https://getartcraft.com/apps">The Crafting Apps</a> ·
+  <a href="https://www.mixel.ch/">MIXEL Website</a> ·
+  <a href="https://www.mixel.ch">MIXEL Creative Apps</a> ·
   <a href="https://github.com/jangopeopleV2/mixel-photo">MIXEL Photo</a>
 </p>
 
@@ -427,7 +411,7 @@ reference files and are not MIXEL branding or distributed as part of the MIXEL a
 <sub>Adobe, Photoshop, Illustrator, Premiere Pro, Lightroom, Acrobat, After Effects and InDesign are trademarks or registered trademarks of Adobe Inc. in the United States and/or other countries. MIXEL Photo is an independent, open-source project and is not affiliated with, sponsored by or endorsed by Adobe Inc.; these names are used only to describe the workflows it is compatible with.</sub>
 
 <p align="center">
-  <sub>Based on MIXEL Photo by the <a href="https://getartcraft.com/">ArtCraft</a> team and community. Maintained by MIXEL.</sub>
+  <sub>Based on <a href="https://github.com/storytold/photocraft">photocraft</a> by Brandon Thomas and upstream contributors. Maintained by MIXEL.</sub>
 </p>
 
 ## Star history

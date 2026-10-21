@@ -188,33 +188,28 @@ fn capture(wayland: bool, scale: f32, stop: &std::sync::atomic::AtomicBool, plac
 #[cfg(target_os = "linux")]
 fn portal(stop: &std::sync::atomic::AtomicBool) -> Result<Capture, String> {
     use std::collections::HashMap;
-    use zbus::{
-        blocking::Proxy,
-        zvariant::{OwnedObjectPath, OwnedValue, Value},
-    };
-    let conn = zbus::blocking::connection::Builder::session()
-        .map_err(|e| e.to_string())?
-        .method_timeout(std::time::Duration::from_secs(10))
-        .build()
-        .map_err(|e| e.to_string())?;
+    use zbus::{OwnedObjectPath, OwnedVariant, Proxy, Variant};
+    let conn = zbus::block_on(zbus::connection::Builder::session().method_timeout(std::time::Duration::from_secs(10)).build()).map_err(|e| e.to_string())?;
     let unique = conn.unique_name().ok_or("Portal connection has no unique name")?.as_str().trim_start_matches(':').replace('.', "_");
     let token = format!("photocraft_{}", std::process::id());
     let path = format!("/org/freedesktop/portal/desktop/request/{unique}/{token}");
-    let request = Proxy::new(&conn, "org.freedesktop.portal.Desktop", path.as_str(), "org.freedesktop.portal.Request").map_err(|e| e.to_string())?;
+    let request =
+        zbus::block_on(Proxy::new(&conn, "org.freedesktop.portal.Desktop", path.as_str(), "org.freedesktop.portal.Request")).map_err(|e| e.to_string())?;
     use futures_lite::StreamExt;
-    let mut replies = futures_lite::future::block_on(request.inner().receive_signal("Response")).map_err(|e| e.to_string())?;
-    let screenshot = Proxy::new(&conn, "org.freedesktop.portal.Desktop", "/org/freedesktop/portal/desktop", "org.freedesktop.portal.Screenshot")
-        .map_err(|e| e.to_string())?;
-    let options: HashMap<&str, Value<'_>> = HashMap::from([("handle_token", Value::from(token.as_str()))]);
+    let mut replies = zbus::block_on(request.receive_signal("Response")).map_err(|e| e.to_string())?;
+    let screenshot =
+        zbus::block_on(Proxy::new(&conn, "org.freedesktop.portal.Desktop", "/org/freedesktop/portal/desktop", "org.freedesktop.portal.Screenshot"))
+            .map_err(|e| e.to_string())?;
+    let options: HashMap<&str, Variant<'_>> = HashMap::from([("handle_token", Variant::from(token.as_str()))]);
     let _handle: OwnedObjectPath =
-        screenshot.call("PickColor", &("", options)).map_err(|e| format!("The desktop portal does not support color picking: {e}"))?;
+        zbus::block_on(screenshot.call("PickColor", &("", options))).map_err(|e| format!("The desktop portal does not support color picking: {e}"))?;
     let deadline = std::time::Instant::now() + std::time::Duration::from_secs(120);
     let reply = loop {
         if stop.load(std::sync::atomic::Ordering::Relaxed) || std::time::Instant::now() >= deadline {
-            let _: Result<(), _> = request.call("Close", &());
+            let _: Result<(), _> = zbus::block_on(request.call("Close", &()));
             return Ok(Capture::Color(None));
         }
-        let next = futures_lite::future::block_on(futures_lite::future::race(async { Some(replies.next().await) }, async {
+        let next = zbus::block_on(futures_lite::future::race(async { Some(replies.next().await) }, async {
             async_io::Timer::after(std::time::Duration::from_millis(50)).await;
             None
         }));
@@ -222,7 +217,7 @@ fn portal(stop: &std::sync::atomic::AtomicBool) -> Result<Capture, String> {
             break message.ok_or("The desktop color picker closed without a result")?;
         }
     };
-    let (code, values): (u32, HashMap<String, OwnedValue>) = reply.body().deserialize().map_err(|e| e.to_string())?;
+    let (code, values): (u32, HashMap<String, OwnedVariant>) = reply.body().deserialize().map_err(|e| e.to_string())?;
     if code == 1 {
         return Ok(Capture::Color(None));
     }
@@ -230,7 +225,7 @@ fn portal(stop: &std::sync::atomic::AtomicBool) -> Result<Capture, String> {
         return Err("The desktop color picker could not sample this screen".into());
     }
     let value = values.get("color").ok_or("Desktop picker returned no color")?;
-    let (r, g, b): (f64, f64, f64) = value.try_clone().map_err(|e| e.to_string())?.try_into().map_err(|e: zbus::zvariant::Error| e.to_string())?;
+    let (r, g, b): (f64, f64, f64) = value.try_clone().map_err(|e| e.to_string())?.try_into().map_err(|e: zbus::Error| e.to_string())?;
     if [r, g, b].iter().any(|v| !v.is_finite() || !(0.0..=1.0).contains(v)) {
         return Err("Desktop picker returned an invalid color".into());
     }

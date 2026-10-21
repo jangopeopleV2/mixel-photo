@@ -9,7 +9,7 @@
 # Clean-room: every entry was written from the plain meaning of the English label using ordinary
 # Spanish computing vocabulary (capa, pincel, selección, lienzo ...). No proprietary localisation
 # resource, string table or product UI was consulted or copied; add entries the same way.
-# Product and technology names (MIXEL Photo, ArtCraft, OpenType, CMYK, Lab ...) stay in Latin
+# Product and technology names (MIXEL Photo, OpenType, CMYK, Lab ...) stay in Latin
 # letters; the trailing "…" of dialog commands is kept.
 
 # Guide layout dialog
@@ -774,8 +774,7 @@
 	About MIXEL Photo	Acerca de MIXEL Photo
 	MIXEL Photo Website	Sitio web de MIXEL Photo
 	MIXEL Photo on GitHub	MIXEL Photo en GitHub
-	ArtCraft Website	Sitio web de ArtCraft
-	Join the ArtCraft Discord…	Únase al Discord de ArtCraft…
+	MIXEL Website	Sitio web de MIXEL
 	Report an Issue…	Informar de un problema…
 	WIA Support…	Compatibilidad con WIA…
 	Apply	Aplicar
@@ -1055,7 +1054,6 @@
 	Diffusion	Difusión
 	Discard the embedded profile (don't color manage)	Descartar el perfil incrustado (no gestionar el color)
 	Discontiguous	No contiguo
-	Discord	Discord
 	Dismiss	Descartar
 	Display P3	Display P3
 	Display Text	Texto de visualización
@@ -1190,7 +1188,6 @@
 	Invert All	Invertir todo
 	Invert has no settings.	Invertir no tiene ajustes.
 	Italic	Cursiva
-	Join us on Discord	Únase a nuestro Discord
 	Justify all	Justificar todo
 	Justify last centered	Justificar última centrada
 	Justify last left	Justificar última a la izquierda
@@ -1597,7 +1594,6 @@
 	Apple Watch 45mm	Apple Watch 45mm
 	Aqua	Aqua
 	Art & Illustration	Arte e ilustración
-	ArtCraft	ArtCraft
 	Background Eraser Tool	Herramienta Borrador de fondos
 	Bevel & Emboss	Bisel y relieve
 	Blend Mode	Modo de fusión

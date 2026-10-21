@@ -599,3 +599,7 @@ dock target. The panel menu and icon rail remain
 available in custom workspaces. `window.panel.<id> {show:true}` always reveals, selects
 and expands the panel, including when another tab is selected. Workspace snapshots
 retain custom collapse settings and Timeline visibility.
+
+## MIXEL company and project links
+
+`help.mixelWebsite` opens `https://www.mixel.ch`. The existing `help.website` remains the product project page. `help.artcraftWebsite` and `help.discord` are not registered.

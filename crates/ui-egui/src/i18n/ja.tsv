@@ -12,7 +12,7 @@
 # Clean-room: every entry was written from the plain meaning of the English label using ordinary
 # Japanese computing vocabulary (レイヤー, ぼかし, 選択範囲 ...). No proprietary localisation
 # resource, string table or product UI was consulted or copied; add entries the same way.
-# Product and technology names (MIXEL Photo, ArtCraft, OpenType, CMYK, Lab ...) stay in Latin
+# Product and technology names (MIXEL Photo, OpenType, CMYK, Lab ...) stay in Latin
 # letters; the trailing "…" of dialog commands is kept.
 
 # Guide layout dialog
@@ -774,8 +774,7 @@
 	About MIXEL Photo	MIXEL Photo について
 	MIXEL Photo Website	MIXEL Photo の Web サイト
 	MIXEL Photo on GitHub	GitHub 上の MIXEL Photo
-	ArtCraft Website	ArtCraft の Web サイト
-	Join the ArtCraft Discord…	ArtCraft の Discord に参加…
+	MIXEL Website	MIXEL の Web サイト
 	Report an Issue…	問題を報告…
 	WIA Support…	WIA サポート…
 	Apply	適用
@@ -1056,7 +1055,6 @@
 	Diffusion	拡散
 	Discard the embedded profile (don't color manage)	埋め込みプロファイルを破棄 (カラーマネジメントしない)
 	Discontiguous	不連続
-	Discord	Discord
 	Dismiss	閉じる
 	Display P3	Display P3
 	Display Text	表示テキスト
@@ -1191,7 +1189,6 @@
 	Invert All	すべて反転
 	Invert has no settings.	階調の反転には設定がありません。
 	Italic	イタリック
-	Join us on Discord	Discord に参加
 	Justify all	均等配置 (最終行も)
 	Justify last centered	最終行中央揃えの両端揃え
 	Justify last left	最終行左揃えの両端揃え
@@ -1596,7 +1593,6 @@
 	Apple Watch 45mm	Apple Watch 45mm
 	Aqua	アクア
 	Art & Illustration	アート・イラスト
-	ArtCraft	ArtCraft
 	Background Eraser Tool	背景消しゴムツール
 	Bevel & Emboss	ベベルとエンボス
 	Blend Mode	描画モード
@@ -3319,7 +3315,6 @@ fontWeight	Italic	斜体
 	Install Plug-in	プラグインをインストール
 	Intersect with	共通部分
 	Intersect with selection  (⇧⌥)	選択範囲との共通部分  (⇧⌥)
-	Join the ArtCraft Discord	ArtCraft の Discord に参加
 	Keep proportions	縦横比を固定
 	Keep view in sync	ビューを同期
 	Keeps the current texture when switching presets.	プリセットを切り替えても現在のテクスチャを維持します。

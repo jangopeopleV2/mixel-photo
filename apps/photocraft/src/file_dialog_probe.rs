@@ -72,23 +72,35 @@ pub fn start() {
 /// bus or the interface is definitely absent, `None` for anything inconclusive (a slow reply).
 #[cfg(target_os = "linux")]
 fn file_chooser_portal() -> Option<bool> {
-    let Ok(conn) = zbus::blocking::connection::Builder::session().and_then(|b| b.method_timeout(std::time::Duration::from_secs(5)).build()) else {
+    let Ok(conn) = zbus::block_on(zbus::connection::Builder::session().method_timeout(std::time::Duration::from_secs(5)).build()) else {
         return Some(false);
     };
-    let proxy = zbus::blocking::proxy::Builder::<zbus::blocking::Proxy<'_>>::new(&conn)
-        .destination("org.freedesktop.portal.Desktop")
-        .and_then(|b| b.path("/org/freedesktop/portal/desktop"))
-        .and_then(|b| b.interface("org.freedesktop.portal.FileChooser"))
-        .and_then(|b| b.cache_properties(zbus::proxy::CacheProperties::No).build())
-        .ok()?;
-    match proxy.get_property::<u32>("version") {
+    let proxy = zbus::block_on(
+        zbus::proxy::Builder::<zbus::Proxy<'_>>::new(&conn)
+            .destination("org.freedesktop.portal.Desktop")
+            .path("/org/freedesktop/portal/desktop")
+            .interface("org.freedesktop.portal.FileChooser")
+            .cache_properties(zbus::proxy::CacheProperties::No)
+            .build(),
+    )
+    .ok()?;
+    portal_property_present(zbus::block_on(proxy.get_property::<u32>("version")))
+}
+
+/// zbus 6 wraps standard D-Bus reply names in FDO; unknown names remain MethodError.
+#[cfg(target_os = "linux")]
+fn portal_property_present(reply: zbus::Result<u32>) -> Option<bool> {
+    match reply {
         Ok(_) => Some(true),
-        Err(zbus::Error::MethodError(name, _, _)) => {
-            let name = name.as_str();
+        Err(error) => {
+            let name = match error {
+                zbus::Error::MethodError(name, _, _) => name.to_string(),
+                zbus::Error::FDO(error) => zbus::DBusError::name(error.as_ref()).to_string(),
+                _ => return None,
+            };
             let absent = ["ServiceUnknown", "UnknownObject", "UnknownInterface", "UnknownProperty"].iter().any(|n| name.ends_with(n));
             absent.then_some(false)
         }
-        Err(_) => None,
     }
 }
 
@@ -98,6 +110,22 @@ mod tests {
 
     fn found(libdbus: Option<bool>, file_chooser_portal: Option<bool>, zenity: bool) -> Findings {
         Findings { libdbus, file_chooser_portal, zenity }
+    }
+
+    #[cfg(target_os = "linux")]
+    #[test]
+    fn maintained_standard_portal_errors_preserve_absent_and_inconclusive_answers() {
+        for error in [
+            zbus::fdo::Error::ServiceUnknown(String::new()),
+            zbus::fdo::Error::UnknownObject(String::new()),
+            zbus::fdo::Error::UnknownInterface(String::new()),
+            zbus::fdo::Error::UnknownProperty(String::new()),
+        ] {
+            assert_eq!(portal_property_present(Err(error.into())), Some(false));
+        }
+        assert_eq!(portal_property_present(Ok(1)), Some(true));
+        assert_eq!(portal_property_present(Err(zbus::fdo::Error::NoReply(String::new()).into())), None);
+        assert_eq!(portal_property_present(Err(zbus::Error::Failure("inconclusive".into()))), None);
     }
 
     #[test]

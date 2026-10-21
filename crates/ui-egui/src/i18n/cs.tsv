@@ -16,7 +16,7 @@
 # particular not the Czech localisation of Adobe Photoshop. Add entries the same way.
 # Conventions: menus are nouns (Soubor, Úpravy, Obraz ...), commands are infinitives (Otevřít…,
 # Uložit jako…), sentence case as in the English source. Product and technology names
-# (MIXEL Photo, ArtCraft, OpenType, CMYK, Lab ...) stay in Latin letters; the trailing "…" of
+# (MIXEL Photo, OpenType, CMYK, Lab ...) stay in Latin letters; the trailing "…" of
 # dialog commands is kept.
 
 # Guide layout dialog
@@ -780,8 +780,7 @@
 	About MIXEL Photo	O aplikaci MIXEL Photo
 	MIXEL Photo Website	Web MIXEL Photo
 	MIXEL Photo on GitHub	MIXEL Photo na GitHubu
-	ArtCraft Website	Web ArtCraft
-	Join the ArtCraft Discord…	Připojit se k Discordu ArtCraft…
+	MIXEL Website	Web MIXEL
 	Report an Issue…	Nahlásit problém…
 	WIA Support…	Podpora WIA…
 	Apply	Použít
@@ -1068,7 +1067,6 @@
 	Diffusion	Difuze
 	Discard the embedded profile (don't color manage)	Zahodit vložený profil (bez správy barev)
 	Discontiguous	Nesouvislé
-	Discord	Discord
 	Dismiss	Zavřít
 	Display P3	Display P3
 	Display Text	Zobrazený text
@@ -1203,7 +1201,6 @@
 	Invert All	Invertovat vše
 	Invert has no settings.	Invertovat nemá žádná nastavení.
 	Italic	Kurzíva
-	Join us on Discord	Přidejte se k nám na Discordu
 	Justify all	Do bloku vše
 	Justify last centered	Do bloku, poslední řádek na střed
 	Justify last left	Do bloku, poslední řádek vlevo
@@ -1612,7 +1609,6 @@
 	Apple Watch 45mm	Apple Watch 45 mm
 	Aqua	Akvamarínové
 	Art & Illustration	Umění a ilustrace
-	ArtCraft	ArtCraft
 	Background Eraser Tool	Nástroj guma pozadí
 	Bevel & Emboss	Úkos a reliéf
 	Blend Mode	Režim prolnutí
@@ -3661,7 +3657,6 @@ navigator	Zoom	Zvětšení
 	on	zapnuto
 	off	vypnuto
 	This adjustment ({key}) is kept as imported and can't be edited yet.	Tato úprava ({key}) se uchovává v importované podobě a zatím ji nelze měnit.
-	Join the ArtCraft Discord ({url})	Přidejte se na Discord ArtCraft ({url})
 	{index} of {total}	{index} z {total}
 @plural	{n} step|{n} steps	{n} krok|{n} kroky|{n} kroků
 	{shortcut} assigned.	Zkratka {shortcut} přiřazena.
