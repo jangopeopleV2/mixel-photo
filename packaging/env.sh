@@ -47,6 +47,61 @@ warn() {
 # Copy licence and readme files that exist into a package directory.
 copy_docs() {
   local dest="$1" f
+  # Full frozen-lock notices; keep application-relative links within Licenses.
+  if [ ! -f "$ROOT/NOTICE" ]; then
+    echo "error: missing legal notice: $ROOT/NOTICE" >&2
+    return 1
+  fi
+  mkdir -p "$dest/Licenses/." || return 1
+  install -m 0644 "$ROOT/NOTICE" "$dest/Licenses/NOTICE" || return 1
+  if [ ! -f "$ROOT/ATTRIBUTION.md" ]; then
+    echo "error: missing legal notice: $ROOT/ATTRIBUTION.md" >&2
+    return 1
+  fi
+  mkdir -p "$dest/Licenses/." || return 1
+  install -m 0644 "$ROOT/ATTRIBUTION.md" "$dest/Licenses/ATTRIBUTION.md" || return 1
+  if [ ! -f "$ROOT/assets/icons/LICENSE-noun-magnetic-lasso.txt" ]; then
+    echo "error: missing legal notice: $ROOT/assets/icons/LICENSE-noun-magnetic-lasso.txt" >&2
+    return 1
+  fi
+  mkdir -p "$dest/Licenses/assets/icons" || return 1
+  install -m 0644 "$ROOT/assets/icons/LICENSE-noun-magnetic-lasso.txt" "$dest/Licenses/assets/icons/LICENSE-noun-magnetic-lasso.txt" || return 1
+  if [ ! -f "$ROOT/assets/icons/LICENSE-symmetry-axes.txt" ]; then
+    echo "error: missing legal notice: $ROOT/assets/icons/LICENSE-symmetry-axes.txt" >&2
+    return 1
+  fi
+  mkdir -p "$dest/Licenses/assets/icons" || return 1
+  install -m 0644 "$ROOT/assets/icons/LICENSE-symmetry-axes.txt" "$dest/Licenses/assets/icons/LICENSE-symmetry-axes.txt" || return 1
+  if [ ! -f "$ROOT/crates/ui-egui/src/LICENSE-solarized.txt" ]; then
+    echo "error: missing legal notice: $ROOT/crates/ui-egui/src/LICENSE-solarized.txt" >&2
+    return 1
+  fi
+  mkdir -p "$dest/Licenses/crates/ui-egui/src" || return 1
+  install -m 0644 "$ROOT/crates/ui-egui/src/LICENSE-solarized.txt" "$dest/Licenses/crates/ui-egui/src/LICENSE-solarized.txt" || return 1
+  if [ ! -f "$ROOT/packaging/licenses/epaint_default_fonts-0.36.2/Hack-Regular.txt" ]; then
+    echo "error: missing legal notice: $ROOT/packaging/licenses/epaint_default_fonts-0.36.2/Hack-Regular.txt" >&2
+    return 1
+  fi
+  mkdir -p "$dest/Licenses/epaint_default_fonts-0.36.2" || return 1
+  install -m 0644 "$ROOT/packaging/licenses/epaint_default_fonts-0.36.2/Hack-Regular.txt" "$dest/Licenses/epaint_default_fonts-0.36.2/Hack-Regular.txt" || return 1
+  if [ ! -f "$ROOT/packaging/licenses/epaint_default_fonts-0.36.2/OFL.txt" ]; then
+    echo "error: missing legal notice: $ROOT/packaging/licenses/epaint_default_fonts-0.36.2/OFL.txt" >&2
+    return 1
+  fi
+  mkdir -p "$dest/Licenses/epaint_default_fonts-0.36.2" || return 1
+  install -m 0644 "$ROOT/packaging/licenses/epaint_default_fonts-0.36.2/OFL.txt" "$dest/Licenses/epaint_default_fonts-0.36.2/OFL.txt" || return 1
+  if [ ! -f "$ROOT/packaging/licenses/epaint_default_fonts-0.36.2/UFL.txt" ]; then
+    echo "error: missing legal notice: $ROOT/packaging/licenses/epaint_default_fonts-0.36.2/UFL.txt" >&2
+    return 1
+  fi
+  mkdir -p "$dest/Licenses/epaint_default_fonts-0.36.2" || return 1
+  install -m 0644 "$ROOT/packaging/licenses/epaint_default_fonts-0.36.2/UFL.txt" "$dest/Licenses/epaint_default_fonts-0.36.2/UFL.txt" || return 1
+  if [ ! -f "$ROOT/packaging/licenses/epaint_default_fonts-0.36.2/emoji-icon-font-mit-license.txt" ]; then
+    echo "error: missing legal notice: $ROOT/packaging/licenses/epaint_default_fonts-0.36.2/emoji-icon-font-mit-license.txt" >&2
+    return 1
+  fi
+  mkdir -p "$dest/Licenses/epaint_default_fonts-0.36.2" || return 1
+  install -m 0644 "$ROOT/packaging/licenses/epaint_default_fonts-0.36.2/emoji-icon-font-mit-license.txt" "$dest/Licenses/epaint_default_fonts-0.36.2/emoji-icon-font-mit-license.txt" || return 1
   for f in README.md LICENSE LICENSE-MIT LICENSE-APACHE COPYRIGHT; do
     if [ -f "$ROOT/$f" ]; then cp "$ROOT/$f" "$dest/"; fi
   done
