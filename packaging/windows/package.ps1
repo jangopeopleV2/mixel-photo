@@ -89,6 +89,27 @@ Remove-Item -Recurse -Force $Stage -ErrorAction SilentlyContinue
 New-Item -ItemType Directory -Force -Path $Stage | Out-Null
 Copy-Item (Join-Path $Bin 'photocraft.exe'), (Join-Path $Bin 'photocraft-cli.exe') $Stage
 
+# Full notices for the frozen epaint_default_fonts 0.36.2 lock and application attribution.
+$LegalStage = Join-Path $Stage 'Licenses'
+$LegalFiles = @(
+  @{ Source = 'NOTICE'; Destination = 'NOTICE' },
+  @{ Source = 'ATTRIBUTION.md'; Destination = 'ATTRIBUTION.md' },
+  @{ Source = 'assets\icons\LICENSE-noun-magnetic-lasso.txt'; Destination = 'assets\icons\LICENSE-noun-magnetic-lasso.txt' },
+  @{ Source = 'assets\icons\LICENSE-symmetry-axes.txt'; Destination = 'assets\icons\LICENSE-symmetry-axes.txt' },
+  @{ Source = 'crates\ui-egui\src\LICENSE-solarized.txt'; Destination = 'crates\ui-egui\src\LICENSE-solarized.txt' },
+  @{ Source = 'packaging\licenses\epaint_default_fonts-0.36.2\Hack-Regular.txt'; Destination = 'epaint_default_fonts-0.36.2\Hack-Regular.txt' },
+  @{ Source = 'packaging\licenses\epaint_default_fonts-0.36.2\OFL.txt'; Destination = 'epaint_default_fonts-0.36.2\OFL.txt' },
+  @{ Source = 'packaging\licenses\epaint_default_fonts-0.36.2\UFL.txt'; Destination = 'epaint_default_fonts-0.36.2\UFL.txt' },
+  @{ Source = 'packaging\licenses\epaint_default_fonts-0.36.2\emoji-icon-font-mit-license.txt'; Destination = 'epaint_default_fonts-0.36.2\emoji-icon-font-mit-license.txt' }
+)
+foreach ($legalNotice in $LegalFiles) {
+  $legalSource = Join-Path $Root $legalNotice.Source
+  if (-not (Test-Path -LiteralPath $legalSource -PathType Leaf)) { throw "Missing legal notice: $legalSource" }
+  $legalDestination = Join-Path $LegalStage $legalNotice.Destination
+  New-Item -ItemType Directory -Force -Path (Split-Path -Parent $legalDestination) -ErrorAction Stop | Out-Null
+  Copy-Item -LiteralPath $legalSource -Destination $legalDestination -ErrorAction Stop
+}
+
 & (Join-Path $PSScriptRoot 'sign.ps1') (Join-Path $Stage 'photocraft.exe') (Join-Path $Stage 'photocraft-cli.exe')
 
 # ---- MSI ---------------------------------------------------------------------------------------
@@ -151,6 +172,7 @@ $Portable = Join-Path $TargetDir "windows-package\photocraft-$Version-windows-$A
 Remove-Item -Recurse -Force $Portable -ErrorAction SilentlyContinue
 New-Item -ItemType Directory -Force -Path $Portable | Out-Null
 Copy-Item (Join-Path $Stage '*.exe') $Portable
+Copy-Item -LiteralPath $LegalStage -Destination (Join-Path $Portable 'Licenses') -Recurse -ErrorAction Stop
 foreach ($f in 'README.md', 'LICENSE', 'LICENSE-MIT', 'LICENSE-APACHE') {
   $p = Join-Path $Root $f
   if (Test-Path $p) { Copy-Item $p $Portable }

@@ -40,7 +40,19 @@
     <Property Id="ARPHELPLINK" Value="https://www.mixel.ch" />
 
     <StandardDirectory Id="ProgramFiles6432Folder">
-      <Directory Id="INSTALLFOLDER" Name="MIXEL Photo" />
+      <Directory Id="INSTALLFOLDER" Name="MIXEL Photo">
+        <Directory Id="LegalDir02283f4403be88ae6cef" Name="Licenses">
+          <Directory Id="LegalDire568b7fba3ed87cae8a9" Name="assets">
+            <Directory Id="LegalDir5d52753b343641df967b" Name="icons" />
+          </Directory>
+          <Directory Id="LegalDir8b958545ee11a09f722a" Name="crates">
+            <Directory Id="LegalDir52d3442acfcec61560c2" Name="ui-egui">
+              <Directory Id="LegalDire787206449da6c047a7c" Name="src" />
+            </Directory>
+          </Directory>
+          <Directory Id="LegalDirf2ee516e148dfe3b7b6e" Name="epaint_default_fonts-0.36.2" />
+        </Directory>
+      </Directory>
     </StandardDirectory>
     <StandardDirectory Id="ProgramMenuFolder" />
 
@@ -50,6 +62,7 @@
     </Property>
 
     <Feature Id="Main" Title="MIXEL Photo" Level="1">
+      <ComponentGroupRef Id="LegalNoticesPhoto" />
       <ComponentGroupRef Id="PhotocraftFiles" />
     </Feature>
 
@@ -150,6 +163,38 @@
 
       <Component Id="PhotocraftCli">
         <File Id="PhotocraftCliExe" Source="$(var.BinDir)\photocraft-cli.exe" KeyPath="yes" />
+      </Component>
+    </ComponentGroup>
+  </Fragment>
+
+  <Fragment>
+    <ComponentGroup Id="LegalNoticesPhoto">
+      <Component Id="LegalComponentbbf94d093e6d6c9b96d0" Directory="LegalDir02283f4403be88ae6cef">
+        <File Id="LegalFilebbf94d093e6d6c9b96d0" Source="$(var.BinDir)\Licenses\NOTICE" KeyPath="yes" />
+      </Component>
+      <Component Id="LegalComponent8151293bff0062b6d3d4" Directory="LegalDir02283f4403be88ae6cef">
+        <File Id="LegalFile8151293bff0062b6d3d4" Source="$(var.BinDir)\Licenses\ATTRIBUTION.md" KeyPath="yes" />
+      </Component>
+      <Component Id="LegalComponent436592d96f8b8bd99a12" Directory="LegalDir5d52753b343641df967b">
+        <File Id="LegalFile436592d96f8b8bd99a12" Source="$(var.BinDir)\Licenses\assets\icons\LICENSE-noun-magnetic-lasso.txt" KeyPath="yes" />
+      </Component>
+      <Component Id="LegalComponent5297798effa5f2e6132f" Directory="LegalDir5d52753b343641df967b">
+        <File Id="LegalFile5297798effa5f2e6132f" Source="$(var.BinDir)\Licenses\assets\icons\LICENSE-symmetry-axes.txt" KeyPath="yes" />
+      </Component>
+      <Component Id="LegalComponentc602c89075c78d687617" Directory="LegalDire787206449da6c047a7c">
+        <File Id="LegalFilec602c89075c78d687617" Source="$(var.BinDir)\Licenses\crates\ui-egui\src\LICENSE-solarized.txt" KeyPath="yes" />
+      </Component>
+      <Component Id="LegalComponent310fb29a018a044872c8" Directory="LegalDirf2ee516e148dfe3b7b6e">
+        <File Id="LegalFile310fb29a018a044872c8" Source="$(var.BinDir)\Licenses\epaint_default_fonts-0.36.2\Hack-Regular.txt" KeyPath="yes" />
+      </Component>
+      <Component Id="LegalComponent7894beff3c5d3bb6a98b" Directory="LegalDirf2ee516e148dfe3b7b6e">
+        <File Id="LegalFile7894beff3c5d3bb6a98b" Source="$(var.BinDir)\Licenses\epaint_default_fonts-0.36.2\OFL.txt" KeyPath="yes" />
+      </Component>
+      <Component Id="LegalComponent609fbfc11bb100687c21" Directory="LegalDirf2ee516e148dfe3b7b6e">
+        <File Id="LegalFile609fbfc11bb100687c21" Source="$(var.BinDir)\Licenses\epaint_default_fonts-0.36.2\UFL.txt" KeyPath="yes" />
+      </Component>
+      <Component Id="LegalComponentc4e3140171d1f02ff29a" Directory="LegalDirf2ee516e148dfe3b7b6e">
+        <File Id="LegalFilec4e3140171d1f02ff29a" Source="$(var.BinDir)\Licenses\epaint_default_fonts-0.36.2\emoji-icon-font-mit-license.txt" KeyPath="yes" />
       </Component>
     </ComponentGroup>
   </Fragment>
